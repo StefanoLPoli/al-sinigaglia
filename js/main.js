@@ -45,7 +45,7 @@ async function loadCSV() {
     console.log('📥 Caricamento CSV...');
     
     try {
-        const response = await fetch('assets/datasets/dataset.csv');
+        const response = await fetch('../assets/datasets/dataset.csv');
         const csvText = await response.text();
         
         console.log('✅ CSV caricato');
