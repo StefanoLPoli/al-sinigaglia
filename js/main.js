@@ -260,20 +260,21 @@ function createPieChart(containerId, stats, color, title) {
 }
 
 function createComparisonChart() {
-    console.log('📊 Creo grafico di confronto mobile-friendly...');
+    console.log('📊 Creo grafico radar mobile-friendly...');
     
-    // Crea il div se non esiste
+    // Crea il div
     if (!document.getElementById('comparison-chart')) {
         const comparisonDiv = document.createElement('div');
         comparisonDiv.id = 'comparison-chart';
         comparisonDiv.style.cssText = `
             margin-top: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e0e7ff;
             width: 100%;
             overflow: hidden;
+            position: relative;
         `;
         
         const statsContainer = document.querySelector('.stats-container');
@@ -284,258 +285,153 @@ function createComparisonChart() {
     
     new p5((p) => {
         let canvasWidth = 0;
-        let mobileMode = false;
+        let canvasHeight = 0;
         
         p.setup = () => {
-            // Calcola larghezza dinamica in base al contenitore
             const container = document.getElementById('comparison-chart');
             if (!container) return;
             
-            // Calcola larghezza disponibile (massimo 800px)
-            const availableWidth = Math.min(container.clientWidth - 30, 800);
-            canvasWidth = Math.max(availableWidth, 300); // Minimo 300px
-            
-            // Determina se siamo in mobile
-            mobileMode = canvasWidth < 500;
-            
-            // Altezza dinamica
-            const canvasHeight = mobileMode ? 350 : 280;
+            // Dimensioni responsive
+            const isMobile = window.innerWidth < 768;
+            canvasWidth = Math.min(container.clientWidth - 40, 600);
+            canvasHeight = isMobile ? 350 : 320;
             
             const canvas = p.createCanvas(canvasWidth, canvasHeight);
             canvas.parent('comparison-chart');
             canvas.style('width', '100%');
             canvas.style('height', 'auto');
+            canvas.style('border-radius', '12px');
             p.noLoop();
-            
-            console.log(`📱 Modalità: ${mobileMode ? 'Mobile' : 'Desktop'}, Larghezza: ${canvasWidth}px`);
         };
         
         p.draw = () => {
             p.clear();
-            p.background(255);
             
-            if (!steppoStats || !guzzoStats || steppoStats.total === 0 || guzzoStats.total === 0) {
-                p.fill(100);
-                p.textAlign(p.CENTER, p.CENTER);
-                p.textSize(14);
-                p.text('Dati insufficienti per il confronto', p.width/2, p.height/2);
-                return;
-            }
+            if (!steppoStats || !guzzoStats) return;
             
-            // Titolo con stile moderno
+            // Sfondo con gradiente
+            drawGradientBackground(p);
+            
+            // Titolo
             p.fill(0, 85, 165);
-            p.textSize(mobileMode ? 16 : 18);
+            p.textSize(18);
             p.textAlign(p.CENTER);
             p.textStyle(p.BOLD);
-            p.text('CONFRONTO DIRETTO: STEPPO vs GUZZO', p.width/2, 25);
+            p.text('📊 CONFRONTO RADAR', p.width/2, 30);
             
-            // Metriche da confrontare
+            // Dati normalizzati per radar
             const metrics = [
-                { 
-                    label: 'VITTORIE %', 
-                    steppo: parseFloat(steppoStats.winRate), 
-                    guzzo: parseFloat(guzzoStats.winRate),
-                    max: 100,
-                    unit: '%',
-                    colorSteppo: [76, 175, 80],    // Verde
-                    colorGuzzo: [255, 152, 0],     // Arancione
-                    format: (val) => `${val.toFixed(1)}%`
-                },
-                { 
-                    label: 'PUNTI/PARTITA', 
-                    steppo: parseFloat(steppoStats.avgPoints), 
-                    guzzo: parseFloat(guzzoStats.avgPoints),
-                    max: 3,
-                    unit: '',
-                    colorSteppo: [33, 150, 243],   // Blu
-                    colorGuzzo: [156, 39, 176],    // Viola
-                    format: (val) => val.toFixed(2)
-                },
-                { 
-                    label: 'GOAL FATTI/PT', 
-                    steppo: steppoStats.goalsFor / steppoStats.total, 
-                    guzzo: guzzoStats.goalsFor / guzzoStats.total,
-                    max: 3,
-                    unit: '',
-                    colorSteppo: [255, 87, 34],    // Arancione scuro
-                    colorGuzzo: [0, 150, 136],     // Verde acqua
-                    format: (val) => val.toFixed(2)
-                },
-                { 
-                    label: 'PARTITE', 
-                    steppo: steppoStats.total, 
-                    guzzo: guzzoStats.total,
-                    max: Math.max(steppoStats.total, guzzoStats.total) * 1.2,
-                    unit: '',
-                    colorSteppo: [121, 85, 72],    // Marrone
-                    colorGuzzo: [96, 125, 139],    // Grigio blu
-                    format: (val) => Math.round(val)
-                }
+                { name: 'VITTORIE %', steppo: parseFloat(steppoStats.winRate)/100, guzzo: parseFloat(guzzoStats.winRate)/100 },
+                { name: 'PUNTI/PT', steppo: parseFloat(steppoStats.avgPoints)/3, guzzo: parseFloat(guzzoStats.avgPoints)/3 },
+                { name: 'GOL F/PT', steppo: (steppoStats.goalsFor/steppoStats.total)/3, guzzo: (guzzoStats.goalsFor/guzzoStats.total)/3 },
+                { name: 'GOL S/PT', steppo: (steppoStats.goalsAgainst/steppoStats.total)/3, guzzo: (guzzoStats.goalsAgainst/guzzoStats.total)/3 },
+                { name: 'PARTITE', steppo: steppoStats.total/50, guzzo: guzzoStats.total/50 }
             ];
             
-            // Configurazione in base al dispositivo
-            const config = {
-                barWidth: mobileMode ? 25 : 35,
-                spacing: mobileMode ? (p.width * 0.25) : (p.width * 0.22),
-                startX: mobileMode ? (p.width * 0.15) : (p.width * 0.12),
-                baseY: mobileMode ? 260 : 200,
-                maxBarHeight: mobileMode ? 120 : 150,
-                labelYOffset: mobileMode ? 40 : 20
-            };
+            const centerX = p.width/2;
+            const centerY = p.height/2 + 20;
+            const radius = Math.min(p.width, p.height) * 0.3;
+            const angleStep = p.TWO_PI / metrics.length;
             
-            // Disegna asse
-            p.stroke(220);
+            // Griglia radar
+            p.stroke(200, 200, 220, 150);
             p.strokeWeight(1);
-            p.line(40, config.baseY, p.width - 40, config.baseY);
+            p.noFill();
             
-            // Disegna ogni metrica
+            // Cerchi concentrici
+            for (let i = 1; i <= 5; i++) {
+                p.ellipse(centerX, centerY, radius * i/5 * 2);
+            }
+            
+            // Linee assi
             for (let i = 0; i < metrics.length; i++) {
-                const x = config.startX + i * config.spacing;
-                const metric = metrics[i];
+                const angle = i * angleStep - p.HALF_PI;
+                const x = centerX + p.cos(angle) * radius;
+                const y = centerY + p.sin(angle) * radius;
                 
-                // Se siamo in mobile e non c'è spazio, andiamo a capo
-                if (mobileMode && i === 2) {
-                    // In mobile mostriamo solo 2 metriche per riga
-                    continue;
-                }
+                p.line(centerX, centerY, x, y);
                 
-                // Calcola altezze normalizzate
-                const steppoHeight = (metric.steppo / metric.max) * config.maxBarHeight;
-                const guzzoHeight = (metric.guzzo / metric.max) * config.maxBarHeight;
-                
-                // Disegna barra Steppo con gradiente
-                drawRoundedBar(p, x - config.barWidth - 8, config.baseY - steppoHeight, 
-                             config.barWidth, steppoHeight, metric.colorSteppo);
-                
-                // Disegna barra Guzzo con gradiente
-                drawRoundedBar(p, x + 8, config.baseY - guzzoHeight, 
-                             config.barWidth, guzzoHeight, metric.colorGuzzo);
-                
-                // Valori numerici con sfondo
-                p.fill(255);
+                // Etichette assi
+                p.fill(100);
                 p.noStroke();
-                p.rectMode(p.CENTER);
-                
-                // Valore Steppo
-                const steppoText = metric.format(metric.steppo);
-                p.fill(metric.colorSteppo);
-                p.textSize(mobileMode ? 10 : 12);
-                p.textAlign(p.CENTER, p.BOTTOM);
-                p.text(steppoText, x - config.barWidth/2 - 8, config.baseY - steppoHeight - 5);
-                
-                // Valore Guzzo
-                const guzzoText = metric.format(metric.guzzo);
-                p.fill(metric.colorGuzzo);
-                p.text(guzzoText, x + config.barWidth/2 + 8, config.baseY - guzzoHeight - 5);
-                
-                // Etichetta metrica
-                p.fill(60);
-                p.textSize(mobileMode ? 9 : 11);
                 p.textAlign(p.CENTER);
-                p.text(metric.label, x, config.baseY + config.labelYOffset);
+                p.textSize(11);
+                p.text(metrics[i].name, 
+                       centerX + p.cos(angle) * (radius + 25), 
+                       centerY + p.sin(angle) * (radius + 20));
             }
             
-            // In mobile, seconda riga di metriche
-            if (mobileMode) {
-                const mobileMetrics = metrics.slice(2);
-                const mobileStartY = config.baseY + 80;
-                
-                p.stroke(220);
-                p.strokeWeight(1);
-                p.line(40, mobileStartY, p.width - 40, mobileStartY);
-                
-                for (let i = 0; i < mobileMetrics.length; i++) {
-                    const x = config.startX + i * config.spacing;
-                    const metric = mobileMetrics[i];
-                    
-                    const steppoHeight = (metric.steppo / metric.max) * config.maxBarHeight;
-                    const guzzoHeight = (metric.guzzo / metric.max) * config.maxBarHeight;
-                    
-                    drawRoundedBar(p, x - config.barWidth - 8, mobileStartY - steppoHeight, 
-                                 config.barWidth, steppoHeight, metric.colorSteppo);
-                    
-                    drawRoundedBar(p, x + 8, mobileStartY - guzzoHeight, 
-                                 config.barWidth, guzzoHeight, metric.colorGuzzo);
-                    
-                    // Valori numerici
-                    p.fill(metric.colorSteppo);
-                    p.textSize(10);
-                    p.textAlign(p.CENTER, p.BOTTOM);
-                    p.text(metric.format(metric.steppo), x - config.barWidth/2 - 8, mobileStartY - steppoHeight - 5);
-                    
-                    p.fill(metric.colorGuzzo);
-                    p.text(metric.format(metric.guzzo), x + config.barWidth/2 + 8, mobileStartY - guzzoHeight - 5);
-                    
-                    p.fill(60);
-                    p.textSize(9);
-                    p.textAlign(p.CENTER);
-                    p.text(metric.label, x, mobileStartY + config.labelYOffset);
-                }
-                
-                // Aggiorna altezza canvas per mobile
-                p.resizeCanvas(canvasWidth, 450);
-            }
+            // Disegna area Steppo
+            drawRadarArea(p, centerX, centerY, radius, metrics, 'steppo', [76, 175, 80, 150], [76, 175, 80, 200]);
             
-            // Legenda moderna
-            drawLegend(p, mobileMode);
+            // Disegna area Guzzo
+            drawRadarArea(p, centerX, centerY, radius, metrics, 'guzzo', [255, 152, 0, 150], [255, 152, 0, 200]);
+            
+            // Legenda
+            p.fill(76, 175, 80, 200);
+            p.rect(p.width/2 - 100, p.height - 40, 15, 15, 3);
+            p.fill(0);
+            p.textSize(12);
+            p.textAlign(p.LEFT);
+            p.text('Steppo', p.width/2 - 80, p.height - 30);
+            
+            p.fill(255, 152, 0, 200);
+            p.rect(p.width/2 + 10, p.height - 40, 15, 15, 3);
+            p.text('Guzzo', p.width/2 + 30, p.height - 30);
         };
         
-        // Funzione helper per barre arrotondate
-        function drawRoundedBar(p, x, y, w, h, color) {
-            if (h === 0) return;
+        function drawGradientBackground(p) {
+            // Sfondo gradiente
+            for (let y = 0; y < p.height; y++) {
+                const inter = p.map(y, 0, p.height, 0, 1);
+                const c = p.lerpColor(p.color(248, 249, 255), p.color(255, 255, 255), inter);
+                p.stroke(c);
+                p.line(0, y, p.width, y);
+            }
+        }
+        
+        function drawRadarArea(p, cx, cy, radius, metrics, player, fillColor, strokeColor) {
+            p.beginShape();
             
-            // Effetto gradiente
-            p.noStroke();
-            for (let i = 0; i < h; i++) {
-                const alpha = p.map(i, 0, h, 200, 255);
-                p.fill(color[0], color[1], color[2], alpha);
-                p.rect(x, y + i, w, 1);
+            for (let i = 0; i < metrics.length; i++) {
+                const value = metrics[i][player];
+                const angle = i * (p.TWO_PI / metrics.length) - p.HALF_PI;
+                const r = radius * value;
+                const x = cx + p.cos(angle) * r;
+                const y = cy + p.sin(angle) * r;
+                
+                p.vertex(x, y);
+                
+                // Punto sul vertice
+                p.fill(strokeColor[0], strokeColor[1], strokeColor[2], 255);
+                p.noStroke();
+                p.ellipse(x, y, 8, 8);
+                
+                // Valore numerico
+                p.fill(0);
+                p.textSize(9);
+                p.textAlign(p.CENTER);
+                p.text((value * 100).toFixed(0) + '%', x, y - 12);
             }
             
-            // Top arrotondato (semi-cerchio)
-            p.fill(color[0], color[1], color[2], 255);
-            p.rect(x, y, w, h);
-            p.ellipseMode(p.CORNER);
-            p.arc(x, y - w/2, w, w, p.PI, p.TWO_PI);
+            p.endShape(p.CLOSE);
+            
+            // Riempimento area
+            p.fill(fillColor[0], fillColor[1], fillColor[2], fillColor[3]);
+            p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
+            p.strokeWeight(2);
         }
         
-        // Funzione per disegnare la legenda
-        function drawLegend(p, isMobile) {
-            const legendY = isMobile ? 420 : (p.height - 20);
-            
-            // Steppo
-            p.fill(76, 175, 80);
-            p.rect(30, legendY - 10, 12, 12, 3);
-            p.fill(0);
-            p.textSize(isMobile ? 10 : 12);
-            p.textAlign(p.LEFT);
-            p.text('Steppo', 47, legendY);
-            
-            // Guzzo
-            p.fill(255, 152, 0);
-            p.rect(isMobile ? 100 : 120, legendY - 10, 12, 12, 3);
-            p.fill(0);
-            p.text('Guzzo', isMobile ? 117 : 137, legendY);
-            
-            // Indicatore responsive
-            p.textSize(9);
-            p.fill(120);
-            p.textAlign(p.CENTER);
-            p.text('📱 Grafico ottimizzato per mobile', p.width/2, legendY + (isMobile ? 20 : 15));
-        }
-        
-        // Aggiungi resize handler per responsive
         p.windowResized = () => {
             const container = document.getElementById('comparison-chart');
             if (!container) return;
             
-            const availableWidth = Math.min(container.clientWidth - 30, 800);
-            const newWidth = Math.max(availableWidth, 300);
+            const isMobile = window.innerWidth < 768;
+            const newWidth = Math.min(container.clientWidth - 40, 600);
+            const newHeight = isMobile ? 350 : 320;
             
-            if (Math.abs(newWidth - canvasWidth) > 50) {
-                p.resizeCanvas(newWidth, mobileMode ? 450 : 280);
-                p.redraw();
-            }
+            p.resizeCanvas(newWidth, newHeight);
+            p.redraw();
         };
     });
 }
