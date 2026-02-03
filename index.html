@@ -2,134 +2,142 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Al Sinigaglia - Steppo vs Guzzo</title>
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Meta per WhatsApp/condivisione -->
+    <meta property="og:title" content="Al Sinigaglia - Steppo vs Guzzo">
+    <meta property="og:description" content="Scopri se il Como vince di più con Steppo o Guzzo allo stadio!">
+    <meta property="og:image" content="https://tuosito.com/assets/logo.png">
+    <meta property="og:url" content="https://tuosito.com">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS SEPARATI PER INDEX.HTML -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/homepage.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
     <style>
-        .homepage {
-            min-height: 100vh;
+        /* Piccole regole specifiche solo per index.html */
+        .homepage-footer {
+            position: absolute;
+            bottom: var(--space-xl);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            z-index: 1;
+            text-align: center;
+            width: 100%;
+            padding: 0 var(--space-md);
+        }
+        
+        .homepage-footer p {
+            margin-bottom: 0;
+        }
+        
+        /* Ottimizzazione caricamento */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--como-blue) 0%, var(--como-red) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #0055A5 0%, #D62828 100%);
-            color: white;
-            text-align: center;
-            padding: 20px;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
         }
         
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
-        .title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: var(--space-lg);
         }
         
-        .subtitle {
-            font-family: 'Roboto', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 300;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .nav-btn {
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .nav-btn.stats {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .nav-btn.game {
-            background: #FF9800;
-            color: white;
-        }
-        
-        .nav-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        
-        .stats-btn:hover {
-            background: #45a049;
-        }
-        
-        .game-btn:hover {
-            background: #f57c00;
-        }
-        
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @media (max-width: 768px) {
-            .title {
-                font-size: 2.5rem;
-            }
-            .subtitle {
-                font-size: 1.2rem;
-            }
-            .nav-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            .nav-btn {
-                width: 250px;
-            }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+    <!-- Loading screen (opzionale) -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p style="color: white;">Caricamento...</p>
+    </div>
+    
+    <!-- Homepage Content -->
     <div class="homepage">
         <div class="logo">⚽</div>
         <h1 class="title">AL SINIGAGLIA</h1>
-        <p class="subtitle">Steppo vs Guzzo - La statistica che non ti aspetti</p>
+        <p class="subtitle">Steppo vs Guzzo<br>La statistica che non ti aspetti</p>
         
         <div class="nav-buttons">
-            <a href="stats.html" class="nav-btn stats">📊 VEDI LE STATISTICHE</a>
-            <a href="game.html" class="nav-btn game">🎮 GIOCA "INDOVINA CHI"</a>
+            <a href="stats.html" class="nav-btn stats">
+                <i class="fas fa-chart-bar"></i>
+                <span>VEDI LE STATISTICHE</span>
+                <small>Scopri i numeri</small>
+            </a>
+            
+            <a href="game.html" class="nav-btn game">
+                <i class="fas fa-gamepad"></i>
+                <span>GIOCA "INDOVINA CHI"</span>
+                <small>Torneo a 5 partite</small>
+            </a>
         </div>
         
-        <div class="footer">
-            <p>Il Como vince sempre con Steppo... o quasi! 😄</p>
+        <div class="homepage-footer">
+            <p>Il Como vince sempre con Steppo, ma con Guzzo... 😄</p>
         </div>
     </div>
+    
+    <!-- Script di inizializzazione -->
+    <script>
+        // Nascondi loading screen quando la pagina è carica
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loading').classList.add('hidden');
+                
+                // Rimuovi completamente dopo l'animazione
+                setTimeout(function() {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+            }, 800); // Mostra per almeno 800ms
+        });
+        
+        // Fallback se load event non si attiva
+        setTimeout(function() {
+            document.getElementById('loading').classList.add('hidden');
+            setTimeout(function() {
+                document.getElementById('loading').style.display = 'none';
+            }, 500);
+        }, 3000);
+        
+        // Aggiungi classe loaded al body per animazioni
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('loaded');
+        });
+    </script>
 </body>
 </html>
