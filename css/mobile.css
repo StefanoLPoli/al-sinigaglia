@@ -1,0 +1,269 @@
+/* mobile.css - Media queries e ottimizzazioni mobile */
+@import 'variables.css';
+
+/* ====== OTTIMIZZAZIONI MOBILE-SPECIFICHE ====== */
+
+/* 1. Migliore gestione touch su iOS */
+@media (hover: none) and (pointer: coarse) {
+    /* Aumenta target touch */
+    .btn,
+    .nav-link,
+    .player-btn,
+    .action-btn {
+        min-height: 44px; /* Apple Human Interface Guidelines */
+        min-width: 44px;
+    }
+    
+    /* Rimuovi hover effects su mobile */
+    .btn:hover,
+    .nav-link:hover,
+    .player-btn:hover,
+    .action-btn:hover {
+        transform: none !important;
+    }
+    
+    /* Migliore feedback al touch */
+    .btn:active,
+    .nav-link:active,
+    .player-btn:active,
+    .action-btn:active {
+        transform: scale(0.95) !important;
+        opacity: 0.9;
+    }
+}
+
+/* 2. Previeni zoom su input su iOS */
+@media screen and (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px !important; /* Previene zoom automatico iOS */
+    }
+}
+
+/* 3. Safe area per iPhone X e superiori */
+@supports (padding: max(0px)) {
+    .game-page,
+    .stats-page {
+        padding-top: max(var(--space-md), env(safe-area-inset-top));
+        padding-bottom: max(var(--space-md), env(safe-area-inset-bottom));
+        padding-left: max(var(--space-md), env(safe-area-inset-left));
+        padding-right: max(var(--space-md), env(safe-area-inset-right));
+    }
+    
+    .homepage {
+        padding-top: max(var(--space-xl), env(safe-area-inset-top));
+        padding-bottom: max(var(--space-xl), env(safe-area-inset-bottom));
+    }
+}
+
+/* 4. Performance migliori su mobile */
+@media (max-width: 768px) {
+    /* Riduci animazioni complesse */
+    .card,
+    .stat-card,
+    .match-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    /* Riduci ombre per performance */
+    .card,
+    .stat-card,
+    .match-card,
+    .btn,
+    .nav-link {
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* Riduci effetti blur e gradient complessi */
+    .page-header,
+    .score-card,
+    .match-card {
+        background-attachment: scroll;
+    }
+}
+
+/* 5. Layout specifici per schermi piccoli */
+@media (max-width: 480px) {
+    /* Riduci padding su schermi molto piccoli */
+    .page-header,
+    .stat-card,
+    .game-container {
+        padding: var(--space-md) !important;
+    }
+    
+    /* Riduci font sizes */
+    h1 { font-size: 1.8rem !important; }
+    h2 { font-size: 1.4rem !important; }
+    h3 { font-size: 1.2rem !important; }
+    
+    .team-score {
+        font-size: 2.5rem !important;
+    }
+    
+    .final-score {
+        font-size: 3rem !important;
+    }
+    
+    /* Stack verticale completo */
+    .progress-header,
+    .match-header,
+    .detail-row {
+        flex-direction: column;
+        gap: var(--space-sm);
+        align-items: flex-start;
+    }
+    
+    /* Numeri più leggibili */
+    .stat-value {
+        font-size: 1.5rem !important;
+    }
+    
+    /* Pulsanti a larghezza piena */
+    .nav-buttons,
+    .players-choice,
+    .action-buttons {
+        width: 100%;
+    }
+    
+    .nav-btn,
+    .player-btn,
+    .action-btn {
+        width: 100%;
+    }
+}
+
+/* 6. Orientamento landscape su mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .homepage {
+        padding: var(--space-md);
+        min-height: auto;
+    }
+    
+    .logo {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-sm);
+    }
+    
+    .title {
+        font-size: 1.8rem;
+        margin-bottom: var(--space-xs);
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: var(--space-md);
+    }
+    
+    .nav-buttons {
+        flex-direction: row;
+        gap: var(--space-sm);
+    }
+    
+    .nav-btn {
+        padding: var(--space-md);
+        font-size: 1rem;
+    }
+    
+    /* Per il gioco in landscape */
+    .game-container {
+        padding: var(--space-md);
+    }
+    
+    .match-card {
+        padding: var(--space-md);
+    }
+    
+    .teams {
+        flex-direction: row;
+        gap: var(--space-md);
+        margin: var(--space-md) 0;
+    }
+}
+
+/* 7. Supporto per dark mode ridotto motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* 8. Ottimizzazioni per connessioni lente */
+@media (prefers-reduced-data: reduce) {
+    /* Rimuovi gradient complessi */
+    .page-header,
+    .score-card,
+    .match-card {
+        background: var(--como-blue) !important;
+    }
+    
+    /* Rimuovi immagini decorative */
+    .homepage::before {
+        display: none;
+    }
+    
+    /* Rimuovi box-shadow complessi */
+    .card,
+    .stat-card,
+    .btn,
+    .nav-link {
+        box-shadow: none !important;
+        border: 1px solid var(--border);
+    }
+}
+
+/* 9. Contenuto ad altezza viewport sicura */
+.full-viewport {
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+/* 10. Scrollbar più sottile su mobile */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--border-light);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: var(--text-tertiary);
+        border-radius: var(--radius-full);
+    }
+}
+
+/* 11. Text-size-adjust per leggibilità */
+@media (max-width: 768px) {
+    html {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+}
+
+/* 12. Previeni overflow orizzontale */
+.mobile-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.mobile-scroll-container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* 13. Ottimizza le tabelle per mobile */
+@media (max-width: 768px) {
+    .mobile-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+}

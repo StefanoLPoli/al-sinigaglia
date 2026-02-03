@@ -1,0 +1,89 @@
+/* variables.css - Variabili globali */
+:root {
+    /* Colori principali */
+    --como-blue: #0055A5;
+    --como-blue-light: #3a7bb8;
+    --como-red: #D62828;
+    --como-red-light: #e05252;
+    
+    /* Colori personaggi */
+    --steppo-green: #2E7D32;
+    --steppo-green-light: #4CAF50;
+    --steppo-green-bg: #E8F5E9;
+    
+    --guzzo-orange: #F57C00;
+    --guzzo-orange-light: #FF9800;
+    --guzzo-orange-bg: #FFF3E0;
+    
+    /* Colori neutrali */
+    --background: #f8f9fa;
+    --card-bg: #ffffff;
+    --card-bg-hover: #fdfdfd;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+    --border: #e0e0e0;
+    --border-light: #f0f0f0;
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-xl: 0 12px 36px rgba(0,0,0,0.15);
+    
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-full: 9999px;
+    
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    
+    /* Tipografia */
+    --font-heading: 'Poppins', -apple-system, sans-serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'SF Mono', Monaco, monospace;
+    
+    /* Breakpoints */
+    --breakpoint-mobile: 320px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1280px;
+    
+    /* Animazioni */
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+    --transition-slow: 500ms ease;
+    
+    /* Z-index */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+}
+
+/* Dark mode (opzionale per il futuro) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #121212;
+        --card-bg: #1e1e1e;
+        --card-bg-hover: #252525;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-tertiary: #888888;
+        --border: #333333;
+        --border-light: #2a2a2a;
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+    }
+}
