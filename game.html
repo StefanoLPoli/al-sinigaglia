@@ -3,68 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indovina Chi - Al Sinigaglia</title>
+    <title>Indovina Chi - Torneo a 5 partite | Al Sinigaglia</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
         .game-page {
-            padding: 20px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
+        /* HEADER */
         .page-header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
+            padding: 25px;
             background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
             color: white;
-            border-radius: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
         }
         
         .page-header h1 {
             font-family: 'Montserrat', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
         
         .page-header p {
-            font-family: 'Roboto', sans-serif;
             font-size: 1.2rem;
-            opacity: 0.9;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
+        /* NAVIGATION */
         .nav-menu {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
         }
         
         .nav-link {
-            padding: 10px 20px;
-            background: #f0f0f0;
-            border-radius: 25px;
+            padding: 12px 25px;
+            background: white;
+            border-radius: 50px;
             text-decoration: none;
             color: #333;
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
             transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         
         .nav-link:hover {
-            background: #FF9800;
-            color: white;
-        }
-        
-        .nav-link.active {
-            background: #FF9800;
-            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
         
         .nav-link.home {
@@ -72,99 +88,267 @@
             color: white;
         }
         
+        .nav-link.stats {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: #FF9800;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* PROGRESS BAR */
+        .progress-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        #quiz-score {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #FF9800;
+            background: #FFF3E0;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .partita-counter {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .partita-counter span {
+            color: #FF9800;
+            font-size: 1.3rem;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 20%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        /* GAME CONTAINER */
         .game-container {
             flex: 1;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        .score-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        #quiz-score {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #FF9800;
-            background: #FFF3E0;
-            padding: 10px 20px;
-            border-radius: 25px;
-        }
-        
-        .match-display {
-            width: 100%;
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
             text-align: center;
         }
         
-        .match-info {
+        /* SCREEN DI INIZIO */
+        .start-screen {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .start-screen h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            color: #0055A5;
             margin-bottom: 20px;
         }
         
-        .match-date {
-            color: #666;
+        .start-screen p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        
+        .rules {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .rules h3 {
+            color: #0055A5;
+            margin-bottom: 15px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .rules ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .rules li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .start-btn {
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.4);
+        }
+        
+        /* MATCH DISPLAY */
+        .match-display {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        .match-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .match-competition {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
             font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .match-date {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
         
         .teams {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            margin: 25px 0;
+            gap: 40px;
+            margin: 30px 0;
         }
         
         .team {
-            font-size: 2rem;
-            font-weight: bold;
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex: 1;
+        }
+        
+        .team.como {
+            align-items: flex-end;
+        }
+        
+        .team.opponent {
+            align-items: flex-start;
         }
         
         .team-name {
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: 10px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
         
         .team.como .team-name {
-            color: #0055A5;
+            color: #FFD700;
+            font-weight: 700;
+        }
+        
+        .team-score {
+            font-size: 4rem;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .vs {
-            font-size: 1.5rem;
-            color: #999;
-            font-weight: bold;
+            font-size: 2rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            margin: 0 10px;
         }
         
+        .match-details {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        /* PLAYER CHOICE */
         .players-choice {
             display: flex;
             justify-content: center;
             gap: 30px;
             margin: 30px 0;
             width: 100%;
+            max-width: 700px;
         }
         
         .player-btn {
             padding: 25px 40px;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             font-size: 1.5rem;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
@@ -173,22 +357,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 200px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            flex: 1;
+            max-width: 280px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
         
         .player-btn:hover:not(:disabled) {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
         
         .player-btn:active:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
         }
         
         .player-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
         
         .steppo-btn {
@@ -210,81 +396,237 @@
         }
         
         .player-emoji {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
         }
         
+        .player-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+        
+        /* FEEDBACK */
         .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
             width: 100%;
-            text-align: center;
-            font-weight: bold;
+            max-width: 700px;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
             display: none;
             animation: fadeIn 0.5s;
         }
         
         .feedback.correct {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border: 2px solid #155724;
         }
         
         .feedback.wrong {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #721c24;
+        }
+        
+        /* NEXT BUTTON */
+        .next-btn {
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(33, 150, 243, 0.4);
+        }
+        
+        /* RESULTS SCREEN */
+        .results-screen {
+            max-width: 600px;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        .results-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            color: #0055A5;
+            margin-bottom: 30px;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(106, 17, 203, 0.3);
+        }
+        
+        .final-score {
+            font-size: 5rem;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .score-text {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .results-details {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .results-details h3 {
+            color: #0055A5;
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .match-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .match-result:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .match-result.correct {
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .match-result.wrong {
+            border-left: 5px solid #F44336;
+        }
+        
+        .match-summary {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .match-verdict {
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-left: 15px;
+        }
+        
+        .match-verdict.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .match-verdict.wrong {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
         }
         
-        .controls {
-            margin-top: 30px;
+        .action-buttons {
             display: flex;
             gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
         }
         
-        .control-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
+        .action-btn {
+            padding: 18px 35px;
+            font-size: 1.2rem;
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
+            border: none;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
         }
         
-        .next-btn {
-            background: #0055A5;
+        .play-again-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
             color: white;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
         }
         
-        .next-btn:hover {
-            background: #003f7f;
+        .play-again-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.4);
         }
         
-        .reset-btn {
-            background: #6c757d;
+        .home-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
             color: white;
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
         }
         
-        .reset-btn:hover {
-            background: #545b62;
+        .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(33, 150, 243, 0.4);
         }
         
+        /* FOOTER */
         footer {
             text-align: center;
             margin-top: 40px;
-            padding: 20px;
+            padding: 25px;
             color: #666;
-            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+            border-top: 1px solid #e0e0e0;
         }
         
+        /* ANIMATIONS */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* RESPONSIVE */
         @media (max-width: 768px) {
+            .game-page {
+                padding: 15px;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
             .players-choice {
                 flex-direction: column;
                 align-items: center;
@@ -292,184 +634,195 @@
             
             .player-btn {
                 width: 100%;
-                max-width: 300px;
+                max-width: 350px;
             }
             
             .teams {
                 flex-direction: column;
-                gap: 10px;
+                gap: 20px;
+            }
+            
+            .team.como, .team.opponent {
+                align-items: center;
+            }
+            
+            .team-score {
+                font-size: 3.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-header {
+                padding: 20px;
             }
             
             .page-header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+            
+            .game-container {
+                padding: 25px;
+            }
+            
+            .match-card {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-page">
-        <!-- Header pagina -->
+        <!-- Header -->
         <header class="page-header">
-            <h1>🎮 INDOVINA CHI C'ERA?</h1>
-            <p>Testa la tua conoscenza delle partite del Como</p>
+            <h1>🎮 INDOVINA CHI.. C'ERA</h1>
+            <p>Quante ne indovini?</p>
         </header>
         
-        <!-- Menu di navigazione -->
+        <!-- Navigation -->
         <nav class="nav-menu">
             <a href="index.html" class="nav-link home">🏠 Home</a>
-            <a href="stats.html" class="nav-link">📊 Statistiche</a>
-            <a href="game.html" class="nav-link active">🎮 Indovina Chi</a>
+            <a href="stats.html" class="nav-link stats">📊 Statistiche</a>
+            <a href="game.html" class="nav-link active">🎮 Quiz</a>
         </nav>
         
-        <!-- Container gioco -->
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progress-container" style="display: none;">
+            <div class="progress-header">
+                <h2>Partita in corso</h2>
+                <div id="quiz-score">Punteggio: 0/5</div>
+            </div>
+            <div class="progress-info">
+                <div class="partita-counter">Partita: <span id="current-match">1</span>/5</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
+        <!-- Game Container -->
         <div class="game-container">
-            <!-- Punteggio -->
-            <div class="score-header">
-                <h2>Partita casuale</h2>
-                <div id="quiz-score">Punteggio: 0</div>
-            </div>
-            
-            <!-- Display partita -->
-            <div class="match-display" id="match-display">
-                <div class="match-info">
-                    <div class="match-date" id="match-date">Caricamento partita...</div>
+            <!-- Start Screen -->
+            <div class="start-screen" id="start-screen">
+                <h2>✨ Benvenuto al Quiz! ✨</h2>
+                <p>Indovina se allo stadio c'era <strong>Steppo</strong> o <strong>Guzzo</strong></p>
+                
+                <div class="rules">
+                    <h3>📝 Come funziona:</h3>
+                    <ul>
+                        <li><strong>5 partite casuali</strong> dal dataset completo</li>
+                        <li><strong>1 punto</strong> per ogni risposta corretta</li>
+                    </ul>
+                    <p>Pronto a sfidare la statistica?</p>
                 </div>
                 
-                <div class="teams">
-                    <div class="team como">
-                        <div class="team-score" id="como-score">-</div>
-                        <div class="team-name">COMO</div>
+                <button class="start-btn" id="start-btn">INIZIA IL QUIZ!</button>
+            </div>
+            
+            <!-- Match Display -->
+            <div class="match-display" id="match-display" style="display: none;">
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-competition" id="match-competition">Serie A</div>
+                        <div class="match-date" id="match-date">24/08/2025</div>
                     </div>
                     
-                    <div class="vs">-</div>
+                    <div class="teams">
+                        <div class="team como">
+                            <div class="team-name">COMO</div>
+                            <div class="team-score" id="como-score">2</div>
+                        </div>
+                        
+                        <div class="vs">VS</div>
+                        
+                        <div class="team opponent">
+                            <div class="team-name" id="opponent-name">LAZIO</div>
+                            <div class="team-score" id="opponent-score">1</div>
+                        </div>
+                    </div>
                     
-                    <div class="team opponent">
-                        <div class="team-score" id="opponent-score">-</div>
-                        <div class="team-name" id="opponent-name">AVVERSARIO</div>
+                    <div class="match-details">
+                        <div class="detail-row">
+                            <span>📍 Stadio:</span>
+                            <span id="match-location">Giuseppe Sinigaglia</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>⏰ Orario:</span>
+                            <span id="match-time">17:30</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>📊 Tiri:</span>
+                            <span id="match-shots">19 (6 in porta)</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="match-details" id="match-details">
-                    <!-- Dettagli aggiuntivi -->
-                </div>
-            </div>
-            
-            <!-- Scelta giocatore -->
-            <div class="players-choice">
-                <button class="player-btn steppo-btn" id="steppo-btn">
-                    <span class="player-emoji">👑</span>
-                    <span>STEPPO</span>
-                    <small>Il portafortuna</small>
-                </button>
+                <h3 style="margin-bottom: 20px; color: #555;">Chi c'era allo stadio?</h3>
                 
-                <button class="player-btn guzzo-btn" id="guzzo-btn">
-                    <span class="player-emoji">😅</span>
-                    <span>GUZZO</span>
-                    <small>La... presenza</small>
-                </button>
+                <!-- Player Choice -->
+                <div class="players-choice">
+                    <button class="player-btn steppo-btn" id="steppo-btn">
+                        <span class="player-emoji">👑</span>
+                        <span>STEPPO</span>
+                        <span class="player-subtitle">Il portafortuna</span>
+                    </button>
+                    
+                    <button class="player-btn guzzo-btn" id="guzzo-btn">
+                        <span class="player-emoji">😅</span>
+                        <span>GUZZO</span>
+                        <span class="player-subtitle">La... presenza</span>
+                    </button>
+                </div>
+                
+                <!-- Feedback -->
+                <div class="feedback" id="feedback"></div>
+                
+                <!-- Next Button -->
+                <button class="next-btn" id="next-btn">Continua →</button>
             </div>
             
-            <!-- Feedback -->
-            <div class="feedback" id="feedback"></div>
-            
-            <!-- Controlli -->
-            <div class="controls">
-                <button class="control-btn next-btn" id="next-btn">Prossima partita →</button>
-                <button class="control-btn reset-btn" id="reset-btn">Reset punteggio</button>
+            <!-- Results Screen -->
+            <div class="results-screen" id="results-screen">
+                <h2 class="results-title">🏆 RISULTATO FINALE</h2>
+                
+                <div class="score-card">
+                    <div class="score-text">Il tuo punteggio:</div>
+                    <div class="final-score" id="final-score">0/5</div>
+                    <div class="score-text" id="score-message">Prova ancora!</div>
+                </div>
+                
+                <div class="results-details">
+                    <h3>📋 Dettaglio partite:</h3>
+                    <div id="results-list"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn play-again-btn" id="play-again-btn">🔄 Gioca di nuovo</button>
+                    <a href="index.html" class="action-btn home-btn">🏠 Torna alla Home</a>
+                </div>
             </div>
         </div>
         
         <footer>
-            <p>Al Sinigaglia - Gioco • Dati aggiornati al <span id="current-date"></span></p>
+            <p>Al Sinigaglia - Torneo "Indovina Chi" • Dati aggiornati al <span id="current-date"></span></p>
         </footer>
     </div>
     
-    <!-- Script specifico per il gioco -->
+    <!-- JavaScript -->
     <script src="js/game.js"></script>
     <script>
-        // Inizializza il gioco
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 Pagina gioco caricata');
-            
-            // Aggiorna data
-            const dateEl = document.getElementById('current-date');
-            if (dateEl) {
-                dateEl.textContent = new Date().toLocaleDateString('it-IT');
-            }
-            
-            // Inizializza gioco se il file esiste
-            if (typeof initGame === 'function') {
-                initGame();
-            } else {
-                // Fallback semplice
-                setupSimpleGame();
-            }
-        });
-        
-        // Fallback se game.js non esiste
-        function setupSimpleGame() {
-            console.log('⚠️  Usando gioco semplice');
-            
-            const steppoBtn = document.getElementById('steppo-btn');
-            const guzzoBtn = document.getElementById('guzzo-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const feedback = document.getElementById('feedback');
-            const scoreEl = document.getElementById('quiz-score');
-            
-            let score = 0;
-            let currentAnswer = 'Steppo'; // Per testing
-            
-            function updateDisplay() {
-                document.getElementById('como-score').textContent = '2';
-                document.getElementById('opponent-score').textContent = '1';
-                document.getElementById('opponent-name').textContent = 'JUVENTUS';
-                document.getElementById('match-date').textContent = '15/03/2024 - Serie A';
-            }
-            
-            function checkAnswer(guess) {
-                const correct = guess === currentAnswer;
-                
-                if (correct) {
-                    score++;
-                    feedback.textContent = `✅ Giusto! Era ${currentAnswer}`;
-                    feedback.className = 'feedback correct';
-                } else {
-                    feedback.textContent = `❌ Sbagliato! Era ${currentAnswer}`;
-                    feedback.className = 'feedback wrong';
-                }
-                
-                feedback.style.display = 'block';
-                scoreEl.textContent = `Punteggio: ${score}`;
-                
-                // Disabilita pulsanti
-                steppoBtn.disabled = true;
-                guzzoBtn.disabled = true;
-            }
-            
-            function nextQuestion() {
-                currentAnswer = Math.random() > 0.5 ? 'Steppo' : 'Guzzo';
-                updateDisplay();
-                feedback.style.display = 'none';
-                steppoBtn.disabled = false;
-                guzzoBtn.disabled = false;
-            }
-            
-            function resetGame() {
-                score = 0;
-                scoreEl.textContent = `Punteggio: ${score}`;
-                nextQuestion();
-            }
-            
-            // Event listeners
-            steppoBtn.addEventListener('click', () => checkAnswer('Steppo'));
-            guzzoBtn.addEventListener('click', () => checkAnswer('Guzzo'));
-            nextBtn.addEventListener('click', nextQuestion);
-            resetBtn.addEventListener('click', resetGame);
-            
-            // Inizia
-            updateDisplay();
-        }
+        // Aggiorna data footer
+        document.getElementById('current-date').textContent = 
+            new Date().toLocaleDateString('it-IT');
     </script>
 </body>
 </html>
