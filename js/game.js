@@ -69,7 +69,7 @@ function setupEventListeners() {
     document.getElementById('start-btn').addEventListener('click', startTournament);
     document.getElementById('steppo-btn').addEventListener('click', () => checkAnswer('Steppo'));
     document.getElementById('guzzo-btn').addEventListener('click', () => checkAnswer('Guzzo'));
-    document.getElementById('next-btn').addEventListener('click', nextMatch);
+    //document.getElementById('next-btn').addEventListener('click', nextMatch);
     document.getElementById('play-again-btn').addEventListener('click', restartTournament);
 }
 
@@ -157,7 +157,7 @@ function displayCurrentMatch() {
     
     // Reset UI per nuova partita
     document.getElementById('feedback').style.display = 'none';
-    document.getElementById('next-btn').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none'; // Nascondi sempre
     enableButtons(true);
     
     // Aggiorna progresso
@@ -185,23 +185,39 @@ function checkAnswer(player) {
         currentGame.score++;
         feedback.textContent = `✅ CORRETTO! C'era ${player}!`;
         feedback.className = 'feedback correct';
+        
+        // Animazione extra per risposta corretta
+        feedback.style.animation = 'pulse 0.5s ease-in-out';
     } else {
         feedback.textContent = `❌ SBAGLIATO! C'era ${match.Tifoso}...`;
         feedback.className = 'feedback wrong';
+        
+        // Animazione shake per risposta sbagliata
+        feedback.style.animation = 'shake 0.5s ease-in-out';
     }
     
     feedback.style.display = 'block';
     updateScore();
     
-    // Disabilita pulsanti e mostra "Continua"
+    // Disabilita pulsanti
     enableButtons(false);
-    document.getElementById('next-btn').style.display = 'block';
     
     // Animazione punteggio
     document.getElementById('quiz-score').classList.add('pulse');
     setTimeout(() => {
         document.getElementById('quiz-score').classList.remove('pulse');
     }, 500);
+    
+    // AUTO-AVANZA dopo 1.5 secondi
+    setTimeout(() => {
+        currentMatchIndex++;
+        
+        if (currentMatchIndex < TOTAL_MATCHES) {
+            displayCurrentMatch();
+        } else {
+            endTournament();
+        }
+    }, 1500); // 1.5 secondi
 }
 
 // Prossima partita
