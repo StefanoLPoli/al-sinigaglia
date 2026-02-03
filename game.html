@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indovina Chi - Al Sinigaglia</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        .game-page {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .page-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            font-family: 'Roboto', sans-serif;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .nav-link {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .nav-link.home {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        #quiz-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FF9800;
+            background: #FFF3E0;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+        
+        .match-display {
+            width: 100%;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .match-info {
+            margin-bottom: 20px;
+        }
+        
+        .match-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .teams {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+        
+        .team {
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .team-name {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .team.como .team-name {
+            color: #0055A5;
+        }
+        
+        .vs {
+            font-size: 1.5rem;
+            color: #999;
+            font-weight: bold;
+        }
+        
+        .players-choice {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            width: 100%;
+        }
+        
+        .player-btn {
+            padding: 25px 40px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .player-btn:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .player-btn:active:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .player-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .steppo-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+        }
+        
+        .steppo-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #45a049 0%, #1B5E20 100%);
+        }
+        
+        .guzzo-btn {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+        
+        .guzzo-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+        }
+        
+        .player-emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .next-btn {
+            background: #0055A5;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background: #003f7f;
+        }
+        
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: #545b62;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .players-choice {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .player-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .teams {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-page">
+        <!-- Header pagina -->
+        <header class="page-header">
+            <h1>🎮 INDOVINA CHI C'ERA?</h1>
+            <p>Testa la tua conoscenza delle partite del Como</p>
+        </header>
+        
+        <!-- Menu di navigazione -->
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-link home">🏠 Home</a>
+            <a href="stats.html" class="nav-link">📊 Statistiche</a>
+            <a href="game.html" class="nav-link active">🎮 Indovina Chi</a>
+        </nav>
+        
+        <!-- Container gioco -->
+        <div class="game-container">
+            <!-- Punteggio -->
+            <div class="score-header">
+                <h2>Partita casuale</h2>
+                <div id="quiz-score">Punteggio: 0</div>
+            </div>
+            
+            <!-- Display partita -->
+            <div class="match-display" id="match-display">
+                <div class="match-info">
+                    <div class="match-date" id="match-date">Caricamento partita...</div>
+                </div>
+                
+                <div class="teams">
+                    <div class="team como">
+                        <div class="team-score" id="como-score">-</div>
+                        <div class="team-name">COMO</div>
+                    </div>
+                    
+                    <div class="vs">-</div>
+                    
+                    <div class="team opponent">
+                        <div class="team-score" id="opponent-score">-</div>
+                        <div class="team-name" id="opponent-name">AVVERSARIO</div>
+                    </div>
+                </div>
+                
+                <div class="match-details" id="match-details">
+                    <!-- Dettagli aggiuntivi -->
+                </div>
+            </div>
+            
+            <!-- Scelta giocatore -->
+            <div class="players-choice">
+                <button class="player-btn steppo-btn" id="steppo-btn">
+                    <span class="player-emoji">👑</span>
+                    <span>STEPPO</span>
+                    <small>Il portafortuna</small>
+                </button>
+                
+                <button class="player-btn guzzo-btn" id="guzzo-btn">
+                    <span class="player-emoji">😅</span>
+                    <span>GUZZO</span>
+                    <small>La... presenza</small>
+                </button>
+            </div>
+            
+            <!-- Feedback -->
+            <div class="feedback" id="feedback"></div>
+            
+            <!-- Controlli -->
+            <div class="controls">
+                <button class="control-btn next-btn" id="next-btn">Prossima partita →</button>
+                <button class="control-btn reset-btn" id="reset-btn">Reset punteggio</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Al Sinigaglia - Gioco • Dati aggiornati al <span id="current-date"></span></p>
+        </footer>
+    </div>
+    
+    <!-- Script specifico per il gioco -->
+    <script src="js/game.js"></script>
+    <script>
+        // Inizializza il gioco
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎮 Pagina gioco caricata');
+            
+            // Aggiorna data
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) {
+                dateEl.textContent = new Date().toLocaleDateString('it-IT');
+            }
+            
+            // Inizializza gioco se il file esiste
+            if (typeof initGame === 'function') {
+                initGame();
+            } else {
+                // Fallback semplice
+                setupSimpleGame();
+            }
+        });
+        
+        // Fallback se game.js non esiste
+        function setupSimpleGame() {
+            console.log('⚠️  Usando gioco semplice');
+            
+            const steppoBtn = document.getElementById('steppo-btn');
+            const guzzoBtn = document.getElementById('guzzo-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const feedback = document.getElementById('feedback');
+            const scoreEl = document.getElementById('quiz-score');
+            
+            let score = 0;
+            let currentAnswer = 'Steppo'; // Per testing
+            
+            function updateDisplay() {
+                document.getElementById('como-score').textContent = '2';
+                document.getElementById('opponent-score').textContent = '1';
+                document.getElementById('opponent-name').textContent = 'JUVENTUS';
+                document.getElementById('match-date').textContent = '15/03/2024 - Serie A';
+            }
+            
+            function checkAnswer(guess) {
+                const correct = guess === currentAnswer;
+                
+                if (correct) {
+                    score++;
+                    feedback.textContent = `✅ Giusto! Era ${currentAnswer}`;
+                    feedback.className = 'feedback correct';
+                } else {
+                    feedback.textContent = `❌ Sbagliato! Era ${currentAnswer}`;
+                    feedback.className = 'feedback wrong';
+                }
+                
+                feedback.style.display = 'block';
+                scoreEl.textContent = `Punteggio: ${score}`;
+                
+                // Disabilita pulsanti
+                steppoBtn.disabled = true;
+                guzzoBtn.disabled = true;
+            }
+            
+            function nextQuestion() {
+                currentAnswer = Math.random() > 0.5 ? 'Steppo' : 'Guzzo';
+                updateDisplay();
+                feedback.style.display = 'none';
+                steppoBtn.disabled = false;
+                guzzoBtn.disabled = false;
+            }
+            
+            function resetGame() {
+                score = 0;
+                scoreEl.textContent = `Punteggio: ${score}`;
+                nextQuestion();
+            }
+            
+            // Event listeners
+            steppoBtn.addEventListener('click', () => checkAnswer('Steppo'));
+            guzzoBtn.addEventListener('click', () => checkAnswer('Guzzo'));
+            nextBtn.addEventListener('click', nextQuestion);
+            resetBtn.addEventListener('click', resetGame);
+            
+            // Inizia
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>

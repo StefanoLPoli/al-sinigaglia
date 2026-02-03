@@ -1,131 +1,104 @@
-// main.js - VERSIONE COMPLETA E FUNZIONANTE
+// main.js - VERSIONE COMPLETA CON GRAFICI
 
 // ==================== VARIABILI GLOBALI ====================
 let dataset = [];
-let quizScore = 0;
-let currentQuizMatch = null;
 let steppoStats = null;
 let guzzoStats = null;
-
-// ==================== INIZIALIZZAZIONE ====================
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('⚽ Al Sinigaglia - Steppo vs Guzzo');
-    
-    addDynamicStyles();
-    
-    try {
-        // 1. Carica il CSV
-        await loadCSV();
-        
-        // 2. Calcola le statistiche
-        calculateStats();
-        
-        // 3. Aggiorna l'interfaccia
-        updateUI();
-        
-        // 4. Crea i grafici
-        createCharts();
-        
-        // 5. Inizializza il quiz
-        initQuiz();
-        
-        // 6. Aggiorna data footer
-        updateFooterDate();
-        
-        console.log('✅ Sito pronto!');
-        
-    } catch (error) {
-        console.error('❌ Errore:', error);
-        useFallbackData();
-    }
-});
 
 // ==================== CARICAMENTO CSV ====================
 async function loadCSV() {
     console.log('📥 Caricamento CSV...');
-    
     try {
-        const response = await fetch('assets/datasets/dataset.csv');
-        const csvText = await response.text();
+        // PROVA PIÙ PERCORSI (locale e GitHub Pages)
+        const paths = [
+            './assets/datasets/dataset.csv',      // Per GitHub Pages
+            'assets/datasets/dataset.csv',        // Per file locale
+            '../assets/datasets/dataset.csv',     // Alternativa
+            '/al-sinigaglia/assets/datasets/dataset.csv'  // Path assoluto GitHub
+        ];
         
-        console.log('✅ CSV caricato');
+        let csvText = '';
+        
+        for (const path of paths) {
+            try {
+                console.log(`🔍 Provo percorso: ${path}`);
+                const response = await fetch(path);
+                if (response.ok) {
+                    csvText = await response.text();
+                    console.log(`✅ CSV trovato: ${path}`);
+                    break;
+                }
+            } catch (error) {
+                console.log(`❌ Fallito: ${path}`);
+            }
+        }
+        
+        if (!csvText) {
+            throw new Error('CSV non trovato in nessun percorso');
+        }
+        
         dataset = parseCSV(csvText);
+        console.log(`✅ ${dataset.length} partite caricate`);
         
     } catch (error) {
         console.error('❌ Errore caricamento CSV:', error);
-        throw error;
+        useFallbackData();
     }
 }
 
-// ==================== PARSING CSV CORRETTO ====================
 function parseCSV(csvText) {
-    console.log('🔧 Parsing CSV...');
+    const lines = csvText.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
     
-    // Normalizza le righe
-    const lines = csvText.trim().replace(/\r/g, '').split('\n');
+    console.log('📋 Colonne trovate:', headers);
     
-    // La PRIMA riga è l'HEADER
-    const headerLine = lines[0];
-    const headers = headerLine.split(',').map(h => h.trim());
-    
-    console.log('Headers:', headers);
-    
-    const result = [];
-    
-    // Processa dalla SECONDA riga in poi
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        
-        const values = line.split(',').map(v => v.trim());
-        const obj = {};
-        
-        // Mappa ogni header al suo valore
-        headers.forEach((header, index) => {
-            obj[header] = values[index] || '';
+    return lines.slice(1)
+        .filter(line => line.trim())  // Rimuove righe vuote
+        .map(line => {
+            const values = line.split(',').map(v => v.trim());
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header] = values[index] || '';
+            });
+            return obj;
         });
-        
-        result.push(obj);
-    }
-    
-    console.log(`✅ ${result.length} partite parsate`);
-    return result;
 }
 
 // ==================== CALCOLO STATISTICHE ====================
 function calculateStats() {
-    console.log('🧮 Calcolo statistiche...');
-    
     steppoStats = calculateForPerson('Steppo');
     guzzoStats = calculateForPerson('Guzzo');
-    
-    console.log('Steppo:', steppoStats);
-    console.log('Guzzo:', guzzoStats);
+    console.log('📊 Statistiche calcolate');
 }
 
 function calculateForPerson(person) {
-    // Filtra partite per questa persona
-    const matches = dataset.filter(match => match.Tifoso === person);
+    // DEBUG: Mostra tutti i valori unici della colonna Tifoso
+    const tifosiUnici = [...new Set(dataset.map(m => m.Tifoso))].filter(Boolean);
+    console.log(`🎫 Valori unici in colonna Tifoso:`, tifosiUnici);
+    
+    const matches = dataset.filter(match => {
+        const tifoso = match.Tifoso ? match.Tifoso.trim() : '';
+        return tifoso === person;
+    });
+    
+    console.log(`👤 ${person}: ${matches.length} partite trovate`);
     
     if (matches.length === 0) {
-        return {
-            total: 0, wins: 0, draws: 0, losses: 0,
-            goalsFor: 0, goalsAgainst: 0,
-            winRate: '0.0', avgPoints: '0.00'
-        };
+        console.warn(`⚠️  Nessuna partita trovata per ${person}`);
+        return getEmptyStats();
     }
     
     const stats = {
         total: matches.length,
         wins: 0, draws: 0, losses: 0,
-        goalsFor: 0, goalsAgainst: 0
+        goalsFor: 0, goalsAgainst: 0,
+        matches: matches
     };
     
     matches.forEach(match => {
         const isComoHome = match.HomeTeam === 'Como';
         const ftr = match.FTR;
         
-        // Risultato
         if (ftr === 'D') {
             stats.draws++;
         } else if ((ftr === 'H' && isComoHome) || (ftr === 'A' && !isComoHome)) {
@@ -149,64 +122,84 @@ function calculateForPerson(person) {
     
     // Calcoli extra
     stats.points = stats.wins * 3 + stats.draws;
-    stats.avgPoints = (stats.points / stats.total).toFixed(2);
-    stats.winRate = ((stats.wins / stats.total) * 100).toFixed(1);
+    stats.avgPoints = stats.total > 0 ? (stats.points / stats.total).toFixed(2) : '0.00';
+    stats.winRate = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(1) : '0.0';
+    
+    console.log(`✅ ${person}: ${stats.wins}V ${stats.draws}N ${stats.losses}P`);
+    console.log(`   Goal: ${stats.goalsFor}-${stats.goalsAgainst}`);
+    console.log(`   Punti/partita: ${stats.avgPoints}`);
     
     return stats;
 }
 
-// ==================== AGGIORNA INTERFACCIA ====================
+// ==================== AGGIORNAMENTO UI ====================
 function updateUI() {
     console.log('🎨 Aggiornamento interfaccia...');
+    updateStats('steppo', steppoStats);
+    updateStats('guzzo', guzzoStats);
+}
+
+function updateStats(prefix, stats) {
+    if (!stats) {
+        console.warn(`⚠️  Nessuna statistica per ${prefix}`);
+        return;
+    }
     
-    // Funzione helper
-    function setValue(id, value) {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = value;
+    const elements = {
+        'total': stats.total,
+        'wins': stats.wins,
+        'draws': stats.draws,
+        'losses': stats.losses,
+        'goals-for': stats.goalsFor,
+        'goals-against': stats.goalsAgainst,
+        'win-rate': `${stats.winRate}%`,
+        'ppg': stats.avgPoints
+    };
+    
+    Object.entries(elements).forEach(([key, value]) => {
+        const id = `${prefix}-${key}`;
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = value;
+            console.log(`✅ ${id}: ${value}`);
+        } else {
+            console.error(`❌ Elemento #${id} non trovato`);
         }
-    }
-    
-    // Steppo
-    if (steppoStats) {
-        setValue('steppo-total', steppoStats.total);
-        setValue('steppo-wins', steppoStats.wins);
-        setValue('steppo-draws', steppoStats.draws);
-        setValue('steppo-losses', steppoStats.losses);
-        setValue('steppo-goals-for', steppoStats.goalsFor);
-        setValue('steppo-goals-against', steppoStats.goalsAgainst);
-        setValue('steppo-win-rate', steppoStats.winRate + '%');
-        setValue('steppo-ppg', steppoStats.avgPoints);
-    }
-    
-    // Guzzo
-    if (guzzoStats) {
-        setValue('guzzo-total', guzzoStats.total);
-        setValue('guzzo-wins', guzzoStats.wins);
-        setValue('guzzo-draws', guzzoStats.draws);
-        setValue('guzzo-losses', guzzoStats.losses);
-        setValue('guzzo-goals-for', guzzoStats.goalsFor);
-        setValue('guzzo-goals-against', guzzoStats.goalsAgainst);
-        setValue('guzzo-win-rate', guzzoStats.winRate + '%');
-        setValue('guzzo-ppg', guzzoStats.avgPoints);
-    }
+    });
 }
 
 // ==================== GRAFICI P5.JS ====================
 function createCharts() {
+    console.log('📊 Creazione grafici...');
+    
+    // Grafico Steppo
     createPieChart('steppo-chart', steppoStats, '#4CAF50', 'STEPPO');
+    
+    // Grafico Guzzo
     createPieChart('guzzo-chart', guzzoStats, '#FF9800', 'GUZZO');
+    
+    // Grafico di confronto
+    createComparisonChart();
 }
 
 function createPieChart(containerId, stats, color, title) {
+    console.log(`📈 Creo grafico per ${title}`);
+    
     new p5((p) => {
         p.setup = () => {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`❌ Container ${containerId} non trovato`);
+                return;
+            }
+            
             const canvas = p.createCanvas(280, 180);
             canvas.parent(containerId);
-            p.noLoop();
+            p.noLoop(); // Disegna solo una volta
         };
         
         p.draw = () => {
+            p.clear();
             p.background(245);
             
             if (!stats || stats.total === 0) {
@@ -233,7 +226,7 @@ function createPieChart(containerId, stats, color, title) {
             // Vittorie (verde)
             if (stats.wins > 0) {
                 const winAngle = p.TWO_PI * (stats.wins / total);
-                p.fill(76, 175, 80);
+                p.fill(76, 175, 80); // Verde
                 p.arc(centerX, centerY, radius, radius, angle, angle + winAngle);
                 angle += winAngle;
             }
@@ -241,7 +234,7 @@ function createPieChart(containerId, stats, color, title) {
             // Pareggi (giallo)
             if (stats.draws > 0) {
                 const drawAngle = p.TWO_PI * (stats.draws / total);
-                p.fill(255, 193, 7);
+                p.fill(255, 193, 7); // Giallo
                 p.arc(centerX, centerY, radius, radius, angle, angle + drawAngle);
                 angle += drawAngle;
             }
@@ -249,112 +242,184 @@ function createPieChart(containerId, stats, color, title) {
             // Sconfitte (rosso)
             if (stats.losses > 0) {
                 const lossAngle = p.TWO_PI * (stats.losses / total);
-                p.fill(244, 67, 54);
+                p.fill(244, 67, 54); // Rosso
                 p.arc(centerX, centerY, radius, radius, angle, angle + lossAngle);
             }
             
-            // Testo statistiche
+            // Statistiche testuali
             p.fill(0);
             p.textSize(14);
             p.textAlign(p.CENTER);
             p.text(`${stats.wins}V ${stats.draws}N ${stats.losses}P`, centerX, centerY + radius + 25);
+            
             p.textSize(12);
             p.text(`${stats.winRate}% vittorie`, centerX, centerY + radius + 40);
+            p.text(`${stats.avgPoints} punti/partita`, centerX, centerY + radius + 55);
         };
     });
 }
 
-// ==================== QUIZ ====================
-function initQuiz() {
-    quizScore = 0;
-    updateQuizScore();
-    nextQuiz();
+function createComparisonChart() {
+    console.log('📊 Creo grafico di confronto...');
     
-    // Event listeners per i pulsanti
-    document.querySelector('.steppo-btn').addEventListener('click', () => guess('Steppo'));
-    document.querySelector('.guzzo-btn').addEventListener('click', () => guess('Guzzo'));
-}
-
-function nextQuiz() {
-    const validMatches = dataset.filter(m => m.Tifoso === 'Steppo' || m.Tifoso === 'Guzzo');
-    
-    if (validMatches.length === 0) {
-        document.getElementById('quiz-match-details').innerHTML = 
-            '<p class="error">Nessuna partita disponibile</p>';
-        return;
+    // Crea il div se non esiste
+    if (!document.getElementById('comparison-chart')) {
+        const comparisonDiv = document.createElement('div');
+        comparisonDiv.id = 'comparison-chart';
+        comparisonDiv.style.cssText = `
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        `;
+        
+        const statsContainer = document.querySelector('.stats-container');
+        if (statsContainer) {
+            statsContainer.appendChild(comparisonDiv);
+        }
     }
     
-    currentQuizMatch = validMatches[Math.floor(Math.random() * validMatches.length)];
-    
-    const isComoHome = currentQuizMatch.HomeTeam === 'Como';
-    const opponent = isComoHome ? currentQuizMatch.AwayTeam : currentQuizMatch.HomeTeam;
-    const comoGoals = isComoHome ? currentQuizMatch.FTHG : currentQuizMatch.FTAG;
-    const oppGoals = isComoHome ? currentQuizMatch.FTAG : currentQuizMatch.FTHG;
-    
-    document.getElementById('quiz-match-details').innerHTML = `
-        <div class="quiz-match">
-            <div class="match-header">
-                <span class="competition">${currentQuizMatch.Competizione}</span>
-                <span class="date">${currentQuizMatch.Date}</span>
-            </div>
-            <div class="score-display">
-                <span class="team como">COMO ${comoGoals}</span>
-                <span class="vs">-</span>
-                <span class="team opponent">${oppGoals} ${opponent}</span>
-            </div>
-            <div class="match-info">
-                <div>📍 ${currentQuizMatch.Location}</div>
-                <div>⏰ ${currentQuizMatch.Time}</div>
-            </div>
-        </div>
-    `;
-    
-    // Nascondi feedback precedente
-    document.getElementById('quiz-feedback').style.display = 'none';
-}
-
-function guess(player) {
-    if (!currentQuizMatch) return;
-    
-    const correct = currentQuizMatch.Tifoso === player;
-    const feedback = document.getElementById('quiz-feedback');
-    
-    if (correct) {
-        quizScore++;
-        feedback.innerHTML = `<div class="correct">✅ Giusto! Era ${player}</div>`;
-    } else {
-        feedback.innerHTML = `<div class="wrong">❌ Sbagliato! Era ${currentQuizMatch.Tifoso}</div>`;
-    }
-    
-    feedback.style.display = 'block';
-    updateQuizScore();
-    
-    // Disabilita pulsanti temporaneamente
-    document.querySelectorAll('.player-btn').forEach(btn => {
-        btn.disabled = true;
+    new p5((p) => {
+        p.setup = () => {
+            const canvas = p.createCanvas(600, 250);
+            canvas.parent('comparison-chart');
+            p.noLoop();
+        };
+        
+        p.draw = () => {
+            p.clear();
+            p.background(245);
+            
+            if (!steppoStats || !guzzoStats || steppoStats.total === 0 || guzzoStats.total === 0) {
+                p.fill(100);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text('Dati insufficienti per il confronto', p.width/2, p.height/2);
+                return;
+            }
+            
+            // Titolo
+            p.fill(0, 85, 165); // Blu Como
+            p.textSize(18);
+            p.textAlign(p.CENTER);
+            p.text('CONFRONTO STEPPO vs GUZZO', p.width/2, 30);
+            
+            // Metriche da confrontare
+            const metrics = [
+                { 
+                    label: 'VITTORIE %', 
+                    steppo: parseFloat(steppoStats.winRate), 
+                    guzzo: parseFloat(guzzoStats.winRate),
+                    max: 100,
+                    unit: '%'
+                },
+                { 
+                    label: 'PUNTI/PARTITA', 
+                    steppo: parseFloat(steppoStats.avgPoints), 
+                    guzzo: parseFloat(guzzoStats.avgPoints),
+                    max: 3,
+                    unit: ''
+                },
+                { 
+                    label: 'GOAL FATTI', 
+                    steppo: steppoStats.goalsFor / steppoStats.total, 
+                    guzzo: guzzoStats.goalsFor / guzzoStats.total,
+                    max: 3,
+                    unit: ''
+                },
+                { 
+                    label: 'PARTITE', 
+                    steppo: steppoStats.total, 
+                    guzzo: guzzoStats.total,
+                    max: Math.max(steppoStats.total, guzzoStats.total) * 1.2,
+                    unit: ''
+                }
+            ];
+            
+            const barWidth = 35;
+            const spacing = 130;
+            const startX = 80;
+            const baseY = 200;
+            const maxBarHeight = 150;
+            
+            // Disegna asse
+            p.stroke(200);
+            p.strokeWeight(1);
+            p.line(50, baseY, p.width - 50, baseY);
+            
+            // Disegna ogni metrica
+            for (let i = 0; i < metrics.length; i++) {
+                const x = startX + i * spacing;
+                const metric = metrics[i];
+                
+                // Calcola altezze normalizzate
+                const steppoHeight = (metric.steppo / metric.max) * maxBarHeight;
+                const guzzoHeight = (metric.guzzo / metric.max) * maxBarHeight;
+                
+                // Barra Steppo
+                p.fill(76, 175, 80); // Verde Steppo
+                p.noStroke();
+                p.rect(x - barWidth - 10, baseY - steppoHeight, barWidth, steppoHeight);
+                
+                // Barra Guzzo
+                p.fill(255, 152, 0); // Arancione Guzzo
+                p.rect(x + 10, baseY - guzzoHeight, barWidth, guzzoHeight);
+                
+                // Valori numerici
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.CENTER);
+                p.text(`${metric.steppo.toFixed(1)}${metric.unit}`, x - barWidth/2 - 10, baseY - steppoHeight - 10);
+                p.text(`${metric.guzzo.toFixed(1)}${metric.unit}`, x + barWidth/2 + 10, baseY - guzzoHeight - 10);
+                
+                // Etichetta metrica
+                p.textSize(11);
+                p.fill(80);
+                p.text(metric.label, x, baseY + 20);
+            }
+            
+            // Legenda
+            p.fill(76, 175, 80);
+            p.rect(50, 220, 15, 15);
+            p.fill(0);
+            p.textSize(12);
+            p.textAlign(p.LEFT);
+            p.text('Steppo', 70, 230);
+            
+            p.fill(255, 152, 0);
+            p.rect(150, 220, 15, 15);
+            p.text('Guzzo', 170, 230);
+            
+            p.textSize(10);
+            p.fill(100);
+            p.textAlign(p.CENTER);
+            p.text('* Altezze barre normalizzate per confronto', p.width/2, 245);
+        };
     });
-    
-    setTimeout(() => {
-        document.querySelectorAll('.player-btn').forEach(btn => {
-            btn.disabled = false;
-        });
-        nextQuiz();
-    }, 2000);
 }
 
-function updateQuizScore() {
-    document.getElementById('quiz-score').textContent = `Punteggio: ${quizScore}`;
+// ==================== FUNZIONI HELPER ====================
+function getEmptyStats() {
+    return {
+        total: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        points: 0,
+        avgPoints: '0.00',
+        winRate: '0.0'
+    };
 }
 
-// ==================== FALLBACK SE IL CSV NON CARICA ====================
 function useFallbackData() {
-    console.log('⚠️  Uso dati di esempio');
+    console.log('⚠️  Uso dati di esempio per testing');
     
     dataset = [
         {
             "Competizione": "Serie A",
             "Date": "24/08/2025",
-            "Location": "Giuseppe Sinigaglia",
             "HomeTeam": "Como",
             "AwayTeam": "Lazio",
             "Tifoso": "Steppo",
@@ -365,7 +430,6 @@ function useFallbackData() {
         {
             "Competizione": "Coppa Italia",
             "Date": "16/08/2025",
-            "Location": "Giuseppe Sinigaglia",
             "HomeTeam": "Como",
             "AwayTeam": "Sudtirol",
             "Tifoso": "Guzzo",
@@ -375,134 +439,94 @@ function useFallbackData() {
         },
         {
             "Competizione": "Serie A",
-            "Date": "30/08/2025",
-            "Location": "Renato Dall'Ara",
-            "HomeTeam": "Bologna",
-            "AwayTeam": "Como",
-            "Tifoso": "N",
+            "Date": "14/09/2025",
+            "HomeTeam": "Como",
+            "AwayTeam": "Inter",
+            "Tifoso": "Steppo",
             "FTHG": "1",
-            "FTAG": "0",
-            "FTR": "H"
+            "FTAG": "1",
+            "FTR": "D"
+        },
+        {
+            "Competizione": "Serie A",
+            "Date": "21/09/2025",
+            "HomeTeam": "Udinese",
+            "AwayTeam": "Como",
+            "Tifoso": "Guzzo",
+            "FTHG": "0",
+            "FTAG": "2",
+            "FTR": "A"
         }
     ];
     
-    calculateStats();
-    updateUI();
-    createCharts();
-    initQuiz();
+    console.log('📊 Dati di esempio:', dataset.length, 'partite');
 }
 
-// ==================== UTILITY FUNCTIONS ====================
+// ==================== INIZIALIZZAZIONE ====================
+async function initStatsPage() {
+    console.log('🚀 Inizializzazione pagina statistiche...');
+    
+    try {
+        // 1. Carica CSV
+        await loadCSV();
+        
+        // 2. Calcola statistiche
+        calculateStats();
+        
+        // 3. Aggiorna UI
+        updateUI();
+        
+        // 4. Crea grafici
+        createCharts();
+        
+        // 5. Aggiorna data footer
+        updateFooterDate();
+        
+        console.log('✅ Pagina statistiche inizializzata');
+        
+    } catch (error) {
+        console.error('❌ Errore inizializzazione:', error);
+        alert('Errore nel caricamento dei dati. Controlla la console per i dettagli.');
+    }
+}
+
 function updateFooterDate() {
-    document.getElementById('current-date').textContent = 
-        new Date().toLocaleDateString('it-IT');
+    const dateEl = document.getElementById('current-date');
+    if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString('it-IT');
+    }
 }
 
-function addDynamicStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        /* Quiz styles */
-        .quiz-match {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        
-        .match-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            color: #666;
-        }
-        
-        .score-display {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin: 15px 0;
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        
-        .team.como {
-            color: #0055A5;
-        }
-        
-        .team.opponent {
-            color: #333;
-        }
-        
-        .vs {
-            color: #999;
-        }
-        
-        .match-info {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .match-info div {
-            margin: 5px 0;
-        }
-        
-        #quiz-feedback {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            display: none;
-        }
-        
-        .correct {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .wrong {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .error {
-            color: #dc3545;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        /* Chart containers */
-        #steppo-chart, #guzzo-chart {
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #eee;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// ==================== DEBUG HELPER ====================
-window.debug = {
+// ==================== DEBUG FUNCTIONS ====================
+window.debugStats = {
     showDataset: () => {
-        console.log('Dataset:', dataset);
-        console.log(`${dataset.length} partite`);
+        console.log('📋 Dataset completo:', dataset);
+        console.log(`📊 ${dataset.length} partite totali`);
         
-        const steppoCount = dataset.filter(m => m.Tifoso === 'Steppo').length;
-        const guzzoCount = dataset.filter(m => m.Tifoso === 'Guzzo').length;
-        
-        console.log(`Steppo: ${steppoCount} partite`);
-        console.log(`Guzzo: ${guzzoCount} partite`);
+        if (dataset.length > 0) {
+            console.log('🎫 Valori unici Tifoso:', [...new Set(dataset.map(m => m.Tifoso))].filter(Boolean));
+            console.log('🏠 Valori unici HomeTeam:', [...new Set(dataset.map(m => m.HomeTeam))].filter(Boolean));
+        }
     },
     
     reload: async () => {
-        console.log('Ricarico tutto...');
+        console.log('🔄 Ricarico tutto...');
         await loadCSV();
         calculateStats();
         updateUI();
         createCharts();
-        nextQuiz();
+    },
+    
+    testParsing: (csvText) => {
+        console.log('🧪 Test parsing...');
+        const testData = parseCSV(csvText);
+        console.log('Risultato test:', testData);
+        return testData;
     }
 };
+
+// ==================== ESPORTA PER USO IN HTML ====================
+// Aggiungi questo alla fine del tuo HTML in stats.html:
+// <script>
+//   document.addEventListener('DOMContentLoaded', initStatsPage);
+// </script>

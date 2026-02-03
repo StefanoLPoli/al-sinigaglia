@@ -4,477 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al Sinigaglia - Steppo vs Guzzo</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        /* STILI BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --como-blue: #0055A5;
-            --como-red: #D62828;
-            --steppo-green: #4CAF50;
-            --guzzo-orange: #FF9800;
-            --light-gray: #f5f5f5;
-            --dark-gray: #333;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            background-color: var(--light-gray);
-            color: var(--dark-gray);
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* HEADER */
-        header {
-            text-align: center;
-            padding: 30px 20px;
-            background: linear-gradient(135deg, var(--como-blue), var(--como-red));
-            color: white;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        header h2 {
-            font-size: 1.2rem;
-            font-weight: normal;
-            opacity: 0.9;
-        }
-
-        /* CONTAINER PRINCIPALE */
-        .main-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        /* CARD DELLE STATISTICHE */
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card h2 {
-            color: var(--dark-gray);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid;
-            font-size: 1.5rem;
-        }
-
-        #steppo-stats h2 {
-            border-bottom-color: var(--steppo-green);
-        }
-
-        #guzzo-stats h2 {
-            border-bottom-color: var(--guzzo-orange);
-        }
-
-        /* GRAFICI */
-        .chart-container {
-            height: 200px;
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            border: 1px solid #eee;
-        }
-
-        /* NUMERI DELLE STATISTICHE */
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        #steppo-stats .stat-value {
-            color: var(--steppo-green);
-        }
-
-        #guzzo-stats .stat-value {
-            color: var(--guzzo-orange);
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        /* SEZIONE QUIZ */
-        .quiz-section {
-            grid-column: span 2;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-            margin-top: 20px;
-        }
-
-        .quiz-section h2 {
-            color: var(--como-blue);
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.8rem;
-        }
-
-        .quiz-game {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        /* PULSANTI PLAYER */
-        .players-choice {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
-        }
-
-        .player-btn {
-            padding: 20px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .homepage {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            min-width: 150px;
-        }
-
-        .player-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .player-btn:active {
-            transform: scale(0.98);
-        }
-
-        .steppo-btn {
-            background-color: var(--steppo-green);
+            background: linear-gradient(135deg, #0055A5 0%, #D62828 100%);
             color: white;
-        }
-
-        .guzzo-btn {
-            background-color: var(--guzzo-orange);
-            color: white;
-        }
-
-        /* DETTAGLI PARTITA QUIZ */
-        .match-details {
-            background-color: #f8f9fa;
+            text-align: center;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid var(--como-blue);
         }
-
-        .match-details h3 {
-            color: var(--como-blue);
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
-        .match-details h2 {
-            color: var(--dark-gray);
-            font-size: 2rem;
-            margin: 10px 0;
+        
+        .subtitle {
+            font-family: 'Roboto', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            opacity: 0.9;
         }
-
-        /* FEEDBACK QUIZ */
-        .quiz-feedback {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: bold;
-            display: none;
-        }
-
-        .correct {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .wrong {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* PUNTEGGIO E CONTROLLI */
-        .quiz-controls {
+        
+        .nav-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-
-        #quiz-score {
+        
+        .nav-btn {
+            padding: 15px 30px;
             font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--como-blue);
-        }
-
-        #next-match-btn {
-            padding: 12px 30px;
-            background-color: var(--como-blue);
-            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
             border: none;
-            border-radius: 25px;
-            font-size: 1rem;
+            border-radius: 50px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
-
-        #next-match-btn:hover {
-            background-color: var(--como-red);
+        
+        .nav-btn.stats {
+            background: #4CAF50;
+            color: white;
         }
-
-        /* FOOTER */
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: #666;
+        
+        .nav-btn.game {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stats-btn:hover {
+            background: #45a049;
+        }
+        
+        .game-btn:hover {
+            background: #f57c00;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            color: rgba(255,255,255,0.7);
             font-size: 0.9rem;
-            border-top: 1px solid #eee;
         }
-
-        /* RESPONSIVE */
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
         @media (max-width: 768px) {
-            .main-container {
-                grid-template-columns: 1fr;
+            .title {
+                font-size: 2.5rem;
             }
-            
-            .quiz-section {
-                grid-column: span 1;
+            .subtitle {
+                font-size: 1.2rem;
             }
-            
-            .players-choice {
+            .nav-buttons {
                 flex-direction: column;
                 align-items: center;
-                gap: 15px;
             }
-            
-            .player-btn {
-                width: 100%;
-                max-width: 250px;
+            .nav-btn {
+                width: 250px;
             }
-            
-            header h1 {
-                font-size: 2rem;
-            }
-        }
-        .extra-charts {
-            grid-column: span 2;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 30px;
-        }
-        .chart-container-large {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
         }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <header>
-        <h1>🏟️ Al Sinigaglia</h1>
-        <h2>Steppo vs Guzzo </h2>
-    </header>
-
-    <!-- CONTAINER PRINCIPALE -->
-    <div class="main-container">
-        <!-- STATISTICHE STEPPO -->
-        <div class="stat-card" id="steppo-stats">
-            <h2>Steppo al Sinigaglia</h2>
-            
-            <div class="chart-container" id="steppo-chart">
-                <!-- Grafico p5.js sarà inserito qui -->
-            </div>
-            
-            <div class="numbers-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-total">0</div>
-                    <div class="stat-label">Partite</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-wins">0</div>
-                    <div class="stat-label">Vittorie</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-draws">0</div>
-                    <div class="stat-label">Pareggi</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-losses">0</div>
-                    <div class="stat-label">Sconfitte</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-goals-for">0</div>
-                    <div class="stat-label">Goal fatti</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-goals-against">0</div>
-                    <div class="stat-label">Goal subiti</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-win-rate">0%</div>
-                    <div class="stat-label">% Vittorie</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="steppo-ppg">0.00</div>
-                    <div class="stat-label">Punti/partita</div>
-                </div>
-            </div>
+    <div class="homepage">
+        <div class="logo">⚽</div>
+        <h1 class="title">AL SINIGAGLIA</h1>
+        <p class="subtitle">Steppo vs Guzzo - La statistica che non ti aspetti</p>
+        
+        <div class="nav-buttons">
+            <a href="stats.html" class="nav-btn stats">📊 VEDI LE STATISTICHE</a>
+            <a href="game.html" class="nav-btn game">🎮 GIOCA "INDOVINA CHI"</a>
         </div>
-
-        <!-- STATISTICHE GUZZO -->
-        <div class="stat-card" id="guzzo-stats">
-            <h2>Guzzo al Sinigaglia</h2>
-            
-            <div class="chart-container" id="guzzo-chart">
-                <!-- Grafico p5.js sarà inserito qui -->
-            </div>
-            
-            <div class="numbers-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-total">0</div>
-                    <div class="stat-label">Partite</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-wins">0</div>
-                    <div class="stat-label">Vittorie</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-draws">0</div>
-                    <div class="stat-label">Pareggi</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-losses">0</div>
-                    <div class="stat-label">Sconfitte</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-goals-for">0</div>
-                    <div class="stat-label">Goal fatti</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-goals-against">0</div>
-                    <div class="stat-label">Goal subiti</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-win-rate">0%</div>
-                    <div class="stat-label">% Vittorie</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="guzzo-ppg">0.00</div>
-                    <div class="stat-label">Punti/partita</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEZIONE QUIZ -->
-        <div class="quiz-section">
-            <h2>📋 Indovina chi c'era?</h2>
-            
-            <div class="match-details" id="quiz-match-details">
-                <p>Caricamento partita...</p>
-            </div>
-            
-            <!-- FEEDBACK -->
-            <div class="quiz-feedback" id="quiz-feedback"></div>
-            
-            <!-- SCELTA PLAYER -->
-            <div class="players-choice">
-                <button class="player-btn steppo-btn" onclick="guess('Steppo')">
-                    <span>👑 STEPPO</span>
-                    <small>Il portafortuna</small>
-                </button>
-                
-                <button class="player-btn guzzo-btn" onclick="guess('Guzzo')">
-                    <span>😅 GUZZO</span>
-                    <small>La... "presenza"</small>
-                </button>
-            </div>
-            
-            <!-- CONTROLLI -->
-            <div class="quiz-controls">
-                <div id="quiz-score">Punteggio: 0</div>
-                <button id="next-match-btn" onclick="nextQuiz()">Prossima partita →</button>
-            </div>
+        
+        <div class="footer">
+            <p>Il Como vince sempre con Steppo... o quasi! 😄</p>
         </div>
     </div>
-
-    <div class="extra-charts">
-        <div class="chart-container-large">
-            <h3>Confronto Dettagliato</h3>
-            <div id="comparison-chart"></div>
-        </div>
-        <div class="chart-container-large">
-            <h3>Timeline Presenze</h3>
-            <div id="timeline-chart"></div>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer>
-        <p>Al Sinigaglia - Statistiche non ufficiali • Dati aggiornati al <span id="current-date"></span></p>
-        <p>Il Como vince sempre con Steppo, (quasi) mai con Guzzo⚽</p>
-    </footer>
-
-    <!-- SCRIPT -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
-    <script>
-        // Inizializza la data nel footer
-        document.getElementById('current-date').textContent = new Date().toLocaleDateString('it-IT');
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
-    <script src="js/main.js"></script>
 </body>
 </html>
