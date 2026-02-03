@@ -260,18 +260,20 @@ function createPieChart(containerId, stats, color, title) {
 }
 
 function createComparisonChart() {
-    console.log('📊 Creo grafico di confronto...');
+    console.log('📊 Creo grafico di confronto mobile-friendly...');
     
     // Crea il div se non esiste
     if (!document.getElementById('comparison-chart')) {
         const comparisonDiv = document.createElement('div');
         comparisonDiv.id = 'comparison-chart';
         comparisonDiv.style.cssText = `
-            margin-top: 30px;
+            margin-top: 20px;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            overflow: hidden;
         `;
         
         const statsContainer = document.querySelector('.stats-container');
@@ -281,28 +283,51 @@ function createComparisonChart() {
     }
     
     new p5((p) => {
+        let canvasWidth = 0;
+        let mobileMode = false;
+        
         p.setup = () => {
-            const canvas = p.createCanvas(600, 250);
+            // Calcola larghezza dinamica in base al contenitore
+            const container = document.getElementById('comparison-chart');
+            if (!container) return;
+            
+            // Calcola larghezza disponibile (massimo 800px)
+            const availableWidth = Math.min(container.clientWidth - 30, 800);
+            canvasWidth = Math.max(availableWidth, 300); // Minimo 300px
+            
+            // Determina se siamo in mobile
+            mobileMode = canvasWidth < 500;
+            
+            // Altezza dinamica
+            const canvasHeight = mobileMode ? 350 : 280;
+            
+            const canvas = p.createCanvas(canvasWidth, canvasHeight);
             canvas.parent('comparison-chart');
+            canvas.style('width', '100%');
+            canvas.style('height', 'auto');
             p.noLoop();
+            
+            console.log(`📱 Modalità: ${mobileMode ? 'Mobile' : 'Desktop'}, Larghezza: ${canvasWidth}px`);
         };
         
         p.draw = () => {
             p.clear();
-            p.background(245);
+            p.background(255);
             
             if (!steppoStats || !guzzoStats || steppoStats.total === 0 || guzzoStats.total === 0) {
                 p.fill(100);
                 p.textAlign(p.CENTER, p.CENTER);
+                p.textSize(14);
                 p.text('Dati insufficienti per il confronto', p.width/2, p.height/2);
                 return;
             }
             
-            // Titolo
-            p.fill(0, 85, 165); // Blu Como
-            p.textSize(18);
+            // Titolo con stile moderno
+            p.fill(0, 85, 165);
+            p.textSize(mobileMode ? 16 : 18);
             p.textAlign(p.CENTER);
-            p.text('CONFRONTO STEPPO vs GUZZO', p.width/2, 30);
+            p.textStyle(p.BOLD);
+            p.text('CONFRONTO DIRETTO: STEPPO vs GUZZO', p.width/2, 25);
             
             // Metriche da confrontare
             const metrics = [
@@ -311,89 +336,206 @@ function createComparisonChart() {
                     steppo: parseFloat(steppoStats.winRate), 
                     guzzo: parseFloat(guzzoStats.winRate),
                     max: 100,
-                    unit: '%'
+                    unit: '%',
+                    colorSteppo: [76, 175, 80],    // Verde
+                    colorGuzzo: [255, 152, 0],     // Arancione
+                    format: (val) => `${val.toFixed(1)}%`
                 },
                 { 
                     label: 'PUNTI/PARTITA', 
                     steppo: parseFloat(steppoStats.avgPoints), 
                     guzzo: parseFloat(guzzoStats.avgPoints),
                     max: 3,
-                    unit: ''
+                    unit: '',
+                    colorSteppo: [33, 150, 243],   // Blu
+                    colorGuzzo: [156, 39, 176],    // Viola
+                    format: (val) => val.toFixed(2)
                 },
                 { 
-                    label: 'GOAL FATTI', 
+                    label: 'GOAL FATTI/PT', 
                     steppo: steppoStats.goalsFor / steppoStats.total, 
                     guzzo: guzzoStats.goalsFor / guzzoStats.total,
                     max: 3,
-                    unit: ''
+                    unit: '',
+                    colorSteppo: [255, 87, 34],    // Arancione scuro
+                    colorGuzzo: [0, 150, 136],     // Verde acqua
+                    format: (val) => val.toFixed(2)
                 },
                 { 
                     label: 'PARTITE', 
                     steppo: steppoStats.total, 
                     guzzo: guzzoStats.total,
                     max: Math.max(steppoStats.total, guzzoStats.total) * 1.2,
-                    unit: ''
+                    unit: '',
+                    colorSteppo: [121, 85, 72],    // Marrone
+                    colorGuzzo: [96, 125, 139],    // Grigio blu
+                    format: (val) => Math.round(val)
                 }
             ];
             
-            const barWidth = 35;
-            const spacing = 130;
-            const startX = 80;
-            const baseY = 200;
-            const maxBarHeight = 150;
+            // Configurazione in base al dispositivo
+            const config = {
+                barWidth: mobileMode ? 25 : 35,
+                spacing: mobileMode ? (p.width * 0.25) : (p.width * 0.22),
+                startX: mobileMode ? (p.width * 0.15) : (p.width * 0.12),
+                baseY: mobileMode ? 260 : 200,
+                maxBarHeight: mobileMode ? 120 : 150,
+                labelYOffset: mobileMode ? 40 : 20
+            };
             
             // Disegna asse
-            p.stroke(200);
+            p.stroke(220);
             p.strokeWeight(1);
-            p.line(50, baseY, p.width - 50, baseY);
+            p.line(40, config.baseY, p.width - 40, config.baseY);
             
             // Disegna ogni metrica
             for (let i = 0; i < metrics.length; i++) {
-                const x = startX + i * spacing;
+                const x = config.startX + i * config.spacing;
                 const metric = metrics[i];
                 
+                // Se siamo in mobile e non c'è spazio, andiamo a capo
+                if (mobileMode && i === 2) {
+                    // In mobile mostriamo solo 2 metriche per riga
+                    continue;
+                }
+                
                 // Calcola altezze normalizzate
-                const steppoHeight = (metric.steppo / metric.max) * maxBarHeight;
-                const guzzoHeight = (metric.guzzo / metric.max) * maxBarHeight;
+                const steppoHeight = (metric.steppo / metric.max) * config.maxBarHeight;
+                const guzzoHeight = (metric.guzzo / metric.max) * config.maxBarHeight;
                 
-                // Barra Steppo
-                p.fill(76, 175, 80); // Verde Steppo
+                // Disegna barra Steppo con gradiente
+                drawRoundedBar(p, x - config.barWidth - 8, config.baseY - steppoHeight, 
+                             config.barWidth, steppoHeight, metric.colorSteppo);
+                
+                // Disegna barra Guzzo con gradiente
+                drawRoundedBar(p, x + 8, config.baseY - guzzoHeight, 
+                             config.barWidth, guzzoHeight, metric.colorGuzzo);
+                
+                // Valori numerici con sfondo
+                p.fill(255);
                 p.noStroke();
-                p.rect(x - barWidth - 10, baseY - steppoHeight, barWidth, steppoHeight);
+                p.rectMode(p.CENTER);
                 
-                // Barra Guzzo
-                p.fill(255, 152, 0); // Arancione Guzzo
-                p.rect(x + 10, baseY - guzzoHeight, barWidth, guzzoHeight);
+                // Valore Steppo
+                const steppoText = metric.format(metric.steppo);
+                p.fill(metric.colorSteppo);
+                p.textSize(mobileMode ? 10 : 12);
+                p.textAlign(p.CENTER, p.BOTTOM);
+                p.text(steppoText, x - config.barWidth/2 - 8, config.baseY - steppoHeight - 5);
                 
-                // Valori numerici
-                p.fill(0);
-                p.textSize(12);
-                p.textAlign(p.CENTER);
-                p.text(`${metric.steppo.toFixed(1)}${metric.unit}`, x - barWidth/2 - 10, baseY - steppoHeight - 10);
-                p.text(`${metric.guzzo.toFixed(1)}${metric.unit}`, x + barWidth/2 + 10, baseY - guzzoHeight - 10);
+                // Valore Guzzo
+                const guzzoText = metric.format(metric.guzzo);
+                p.fill(metric.colorGuzzo);
+                p.text(guzzoText, x + config.barWidth/2 + 8, config.baseY - guzzoHeight - 5);
                 
                 // Etichetta metrica
-                p.textSize(11);
-                p.fill(80);
-                p.text(metric.label, x, baseY + 20);
+                p.fill(60);
+                p.textSize(mobileMode ? 9 : 11);
+                p.textAlign(p.CENTER);
+                p.text(metric.label, x, config.baseY + config.labelYOffset);
             }
             
-            // Legenda
+            // In mobile, seconda riga di metriche
+            if (mobileMode) {
+                const mobileMetrics = metrics.slice(2);
+                const mobileStartY = config.baseY + 80;
+                
+                p.stroke(220);
+                p.strokeWeight(1);
+                p.line(40, mobileStartY, p.width - 40, mobileStartY);
+                
+                for (let i = 0; i < mobileMetrics.length; i++) {
+                    const x = config.startX + i * config.spacing;
+                    const metric = mobileMetrics[i];
+                    
+                    const steppoHeight = (metric.steppo / metric.max) * config.maxBarHeight;
+                    const guzzoHeight = (metric.guzzo / metric.max) * config.maxBarHeight;
+                    
+                    drawRoundedBar(p, x - config.barWidth - 8, mobileStartY - steppoHeight, 
+                                 config.barWidth, steppoHeight, metric.colorSteppo);
+                    
+                    drawRoundedBar(p, x + 8, mobileStartY - guzzoHeight, 
+                                 config.barWidth, guzzoHeight, metric.colorGuzzo);
+                    
+                    // Valori numerici
+                    p.fill(metric.colorSteppo);
+                    p.textSize(10);
+                    p.textAlign(p.CENTER, p.BOTTOM);
+                    p.text(metric.format(metric.steppo), x - config.barWidth/2 - 8, mobileStartY - steppoHeight - 5);
+                    
+                    p.fill(metric.colorGuzzo);
+                    p.text(metric.format(metric.guzzo), x + config.barWidth/2 + 8, mobileStartY - guzzoHeight - 5);
+                    
+                    p.fill(60);
+                    p.textSize(9);
+                    p.textAlign(p.CENTER);
+                    p.text(metric.label, x, mobileStartY + config.labelYOffset);
+                }
+                
+                // Aggiorna altezza canvas per mobile
+                p.resizeCanvas(canvasWidth, 450);
+            }
+            
+            // Legenda moderna
+            drawLegend(p, mobileMode);
+        };
+        
+        // Funzione helper per barre arrotondate
+        function drawRoundedBar(p, x, y, w, h, color) {
+            if (h === 0) return;
+            
+            // Effetto gradiente
+            p.noStroke();
+            for (let i = 0; i < h; i++) {
+                const alpha = p.map(i, 0, h, 200, 255);
+                p.fill(color[0], color[1], color[2], alpha);
+                p.rect(x, y + i, w, 1);
+            }
+            
+            // Top arrotondato (semi-cerchio)
+            p.fill(color[0], color[1], color[2], 255);
+            p.rect(x, y, w, h);
+            p.ellipseMode(p.CORNER);
+            p.arc(x, y - w/2, w, w, p.PI, p.TWO_PI);
+        }
+        
+        // Funzione per disegnare la legenda
+        function drawLegend(p, isMobile) {
+            const legendY = isMobile ? 420 : (p.height - 20);
+            
+            // Steppo
             p.fill(76, 175, 80);
-            p.rect(50, 220, 15, 15);
+            p.rect(30, legendY - 10, 12, 12, 3);
             p.fill(0);
-            p.textSize(12);
+            p.textSize(isMobile ? 10 : 12);
             p.textAlign(p.LEFT);
-            p.text('Steppo', 70, 230);
+            p.text('Steppo', 47, legendY);
             
+            // Guzzo
             p.fill(255, 152, 0);
-            p.rect(150, 220, 15, 15);
-            p.text('Guzzo', 170, 230);
+            p.rect(isMobile ? 100 : 120, legendY - 10, 12, 12, 3);
+            p.fill(0);
+            p.text('Guzzo', isMobile ? 117 : 137, legendY);
             
-            p.textSize(10);
-            p.fill(100);
+            // Indicatore responsive
+            p.textSize(9);
+            p.fill(120);
             p.textAlign(p.CENTER);
-            p.text('* Altezze barre normalizzate per confronto', p.width/2, 245);
+            p.text('📱 Grafico ottimizzato per mobile', p.width/2, legendY + (isMobile ? 20 : 15));
+        }
+        
+        // Aggiungi resize handler per responsive
+        p.windowResized = () => {
+            const container = document.getElementById('comparison-chart');
+            if (!container) return;
+            
+            const availableWidth = Math.min(container.clientWidth - 30, 800);
+            const newWidth = Math.max(availableWidth, 300);
+            
+            if (Math.abs(newWidth - canvasWidth) > 50) {
+                p.resizeCanvas(newWidth, mobileMode ? 450 : 280);
+                p.redraw();
+            }
         };
     });
 }
