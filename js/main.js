@@ -283,7 +283,7 @@ function createComparisonChart() {
         }
     }
     
-    new p5((p) => {
+    /*new p5((p) => {
         let canvasWidth = 0;
         let canvasHeight = 0;
         
@@ -420,6 +420,202 @@ function createComparisonChart() {
             p.fill(fillColor[0], fillColor[1], fillColor[2], fillColor[3]);
             p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
             p.strokeWeight(2);
+        }
+        
+        p.windowResized = () => {
+            const container = document.getElementById('comparison-chart');
+            if (!container) return;
+            
+            const isMobile = window.innerWidth < 768;
+            const newWidth = Math.min(container.clientWidth - 40, 600);
+            const newHeight = isMobile ? 350 : 320;
+            
+            p.resizeCanvas(newWidth, newHeight);
+            p.redraw();
+        };
+    });*/
+    console.log('📊 Creo grafico radar mobile-friendly...');
+    
+    // Crea il div
+    if (!document.getElementById('comparison-chart')) {
+        const comparisonDiv = document.createElement('div');
+        comparisonDiv.id = 'comparison-chart';
+        comparisonDiv.style.cssText = `
+            margin-top: 20px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e0e7ff;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        `;
+        
+        const statsContainer = document.querySelector('.stats-container');
+        if (statsContainer) {
+            statsContainer.appendChild(comparisonDiv);
+        }
+    }
+    
+    new p5((p) => {
+        let canvasWidth = 0;
+        let canvasHeight = 0;
+        
+        p.setup = () => {
+            const container = document.getElementById('comparison-chart');
+            if (!container) return;
+            
+            // Dimensioni responsive
+            const isMobile = window.innerWidth < 768;
+            canvasWidth = Math.min(container.clientWidth - 40, 600);
+            canvasHeight = isMobile ? 350 : 320;
+            
+            const canvas = p.createCanvas(canvasWidth, canvasHeight);
+            canvas.parent('comparison-chart');
+            canvas.style('width', '100%');
+            canvas.style('height', 'auto');
+            canvas.style('border-radius', '12px');
+            p.noLoop();
+        };
+        
+        p.draw = () => {
+            p.clear();
+            
+            if (!steppoStats || !guzzoStats) return;
+            
+            // Sfondo con gradiente
+            drawGradientBackground(p);
+            
+            // Dati normalizzati per radar
+            const metrics = [
+                { name: 'VITTORIE %', steppo: parseFloat(steppoStats.winRate)/100, guzzo: parseFloat(guzzoStats.winRate)/100 },
+                { name: 'PUNTI/PT', steppo: parseFloat(steppoStats.avgPoints)/3, guzzo: parseFloat(guzzoStats.avgPoints)/3 },
+                { name: 'GOL F/PT', steppo: (steppoStats.goalsFor/steppoStats.total)/3, guzzo: (guzzoStats.goalsFor/guzzoStats.total)/3 },
+                { name: 'GOL S/PT', steppo: (steppoStats.goalsAgainst/steppoStats.total)/3, guzzo: (guzzoStats.goalsAgainst/guzzoStats.total)/3 },
+                { name: 'PARTITE', steppo: steppoStats.total/50, guzzo: guzzoStats.total/50 }
+            ];
+            
+            const centerX = p.width/2;
+            const centerY = p.height/2 + 20;
+            const radius = Math.min(p.width, p.height) * 0.3;
+            const angleStep = p.TWO_PI / metrics.length;
+            
+            // Griglia radar
+            p.push();
+            p.stroke(200, 200, 220, 150);
+            p.strokeWeight(1);
+            p.noFill();
+            
+            // Cerchi concentrici
+            for (let i = 1; i <= 5; i++) {
+                p.ellipse(centerX, centerY, radius * i/5 * 2);
+            }
+            
+            // Linee assi
+            for (let i = 0; i < metrics.length; i++) {
+                const angle = i * angleStep - p.HALF_PI;
+                const x = centerX + p.cos(angle) * radius;
+                const y = centerY + p.sin(angle) * radius;
+                
+                p.line(centerX, centerY, x, y);
+            }
+            p.pop();
+            
+            // Etichette assi
+            p.push();
+            for (let i = 0; i < metrics.length; i++) {
+                const angle = i * angleStep - p.HALF_PI;
+                p.fill(100);
+                p.noStroke();
+                p.textAlign(p.CENTER);
+                p.textSize(11);
+                p.text(metrics[i].name, 
+                       centerX + p.cos(angle) * (radius + 25), 
+                       centerY + p.sin(angle) * (radius + 20));
+            }
+            p.pop();
+            
+            // Disegna area Steppo
+            drawRadarArea(p, centerX, centerY, radius, metrics, 'steppo', [76, 175, 80, 150], [76, 175, 80, 200]);
+            
+            // Disegna area Guzzo
+            drawRadarArea(p, centerX, centerY, radius, metrics, 'guzzo', [255, 152, 0, 150], [255, 152, 0, 200]);
+            
+            // Punti e valori sui vertici
+            p.push();
+            for (let i = 0; i < metrics.length; i++) {
+                for (const player of ['steppo', 'guzzo']) {
+                    const value = metrics[i][player];
+                    const angle = i * angleStep - p.HALF_PI;
+                    const r = radius * value;
+                    const x = centerX + p.cos(angle) * r;
+                    const y = centerY + p.sin(angle) * r;
+                    
+                    // Punto sul vertice
+                    p.fill(player === 'steppo' ? [76, 175, 80] : [255, 152, 0]);
+                    p.noStroke();
+                    p.ellipse(x, y, 8, 8);
+                    
+                    // Valore numerico (solo per il più alto tra i due)
+                    if (player === 'steppo' || metrics[i].steppo < metrics[i].guzzo) {
+                        p.fill(0);
+                        p.textSize(9);
+                        p.textAlign(p.CENTER);
+                        const displayValue = player === 'steppo' ? metrics[i].steppo : metrics[i].guzzo;
+                        p.text((displayValue * 100).toFixed(0) + '%', x, y - 12);
+                    }
+                }
+            }
+            p.pop();
+            
+            // Legenda
+            p.push();
+            p.fill(76, 175, 80, 200);
+            p.rect(p.width/2 - 100, p.height - 40, 15, 15, 3);
+            p.fill(0);
+            p.textSize(12);
+            p.textAlign(p.LEFT);
+            p.text('Steppo', p.width/2 - 80, p.height - 30);
+            
+            p.fill(255, 152, 0, 200);
+            p.rect(p.width/2 + 10, p.height - 40, 15, 15, 3);
+            p.text('Guzzo', p.width/2 + 30, p.height - 30);
+            p.pop();
+        };
+        
+        function drawGradientBackground(p) {
+            p.push();
+            // Sfondo gradiente
+            for (let y = 0; y < p.height; y++) {
+                const inter = p.map(y, 0, p.height, 0, 1);
+                const c = p.lerpColor(p.color(248, 249, 255), p.color(255, 255, 255), inter);
+                p.stroke(c);
+                p.line(0, y, p.width, y);
+            }
+            p.pop();
+        }
+        
+        function drawRadarArea(p, cx, cy, radius, metrics, player, fillColor, strokeColor) {
+            p.push();
+            p.beginShape();
+            
+            for (let i = 0; i < metrics.length; i++) {
+                const value = metrics[i][player];
+                const angle = i * (p.TWO_PI / metrics.length) - p.HALF_PI;
+                const r = radius * value;
+                const x = cx + p.cos(angle) * r;
+                const y = cy + p.sin(angle) * r;
+                
+                p.vertex(x, y);
+            }
+            
+            p.endShape(p.CLOSE);
+            
+            // Riempimento area
+            p.fill(fillColor[0], fillColor[1], fillColor[2], fillColor[3]);
+            p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
+            p.strokeWeight(2);
+            p.pop();
         }
         
         p.windowResized = () => {
